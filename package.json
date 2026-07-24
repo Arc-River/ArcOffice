@@ -1,0 +1,65 @@
+{
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.29.2",
+  "main": "dist-electron/main.js",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "electron",
+      "tesseract.js"
+    ]
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "vite",
+    "electron:build": "vite build && electron-builder",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "pnpm lint:biome",
+    "lint:ci": "biome ci src/ electron/",
+    "lint:biome": "biome check --write src/ electron/",
+    "format": "biome format --write src/ electron/",
+    "prepare": "simple-git-hooks"
+  },
+  "lint-staged": {
+    "*.{ts,vue}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39",
+    "@element-plus/icons-vue": "^2.3.2",
+    "element-plus": "^2.9",
+    "markstream-vue": "^1.0.7",
+    "pinia": "^2.3",
+    "sql.js": "^1.14.1",
+    "vue": "^3.5",
+    "vue-i18n": "^10",
+    "vue-router": "^4.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2",
+    "@types/node": "^22",
+    "@types/sql.js": "^1.4.11",
+    "@vitejs/plugin-vue": "^5",
+    "electron": "^34",
+    "electron-builder": "^25",
+    "lint-staged": "^17",
+    "sass": "^1.83",
+    "simple-git-hooks": "^2",
+    "typescript": "~5.7",
+    "unplugin-auto-import": "^0.19",
+    "unplugin-element-plus": "^0.11.2",
+    "unplugin-vue-components": "^0.28",
+    "vite": "^6",
+    "vite-plugin-electron": "^0.28",
+    "vite-plugin-electron-renderer": "^1.0.0",
+    "vue-tsc": "^2"
+  }
+}

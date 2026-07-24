@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="100%" height="100%">
+  <defs>
+    <filter id="s" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1677FF" flood-opacity="0.30"/>
+    </filter>
+  </defs>
+  <!-- 8 个方块组成字母 A -->
+  <g fill="#1677FF" filter="url(#s)">
+    <!-- 拱顶 --><rect x="74" y="50" width="44" height="44" rx="6"/>
+    <rect x="122" y="50" width="44" height="44" rx="6"/>
+    <!-- 拱身 --><rect x="26" y="98" width="44" height="44" rx="6"/>
+    <rect x="74" y="98" width="44" height="44" rx="6"/>
+    <rect x="122" y="98" width="44" height="44" rx="6"/>
+    <rect x="170" y="98" width="44" height="44" rx="6"/>
+    <!-- 拱脚 --><rect x="26" y="146" width="44" height="44" rx="6"/>
+    <rect x="170" y="146" width="44" height="44" rx="6"/>
+  </g>
+</svg>

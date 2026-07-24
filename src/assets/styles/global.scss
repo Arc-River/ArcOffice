@@ -1,0 +1,181 @@
+// ============================================================
+// ArcOffice Design Tokens — Light Theme (:root)
+// All custom component styles MUST use --arc-* variables.
+// ============================================================
+:root {
+  color-scheme: light;
+  // ── Brand / Accent ──
+  --arc-brand-blue: #1677FF;
+  --arc-accent-lime: #D4ED9A;
+  --arc-accent-lilac: #C5B0F4;
+  --arc-accent-lime-soft: #EEF7D4;
+
+  // ── Semantic ──
+  --arc-success: #00B42A;
+  --arc-warning: #FF7D00;
+  --arc-danger: #F53F3F;
+  --arc-info: #86909C;
+
+  // ── Text ──
+  --arc-text-primary: #1D2129;
+  --arc-text-secondary: #4E5969;
+  --arc-text-placeholder: #86909C;
+
+  // ── Surfaces ──
+  --arc-bg-page: #F2F3F5;
+  --arc-bg-canvas: #FFFFFF;
+  --arc-bg-card: #FFFFFF;
+  --arc-bg-soft: #F7F8FA;
+  --arc-bg-hover: #F5F7FA;
+
+  // ── Border ──
+  --arc-border: #E5E6EB;
+
+  // ── Shadows ──
+  --arc-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --arc-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --arc-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.08);
+
+  // ── Radii ──
+  --arc-radius-sm: 2px;
+  --arc-radius-md: 4px;
+  --arc-radius-lg: 8px;
+  --arc-radius-xl: 12px;
+  --arc-radius-full: 9999px;
+
+  // ── Spacing ──
+  --arc-space-hair: 1px;
+  --arc-space-xxs: 4px;
+  --arc-space-xs: 8px;
+  --arc-space-sm: 12px;
+  --arc-space-md: 16px;
+  --arc-space-lg: 24px;
+  --arc-space-xl: 32px;
+  --arc-space-xxl: 48px;
+  --arc-space-section: 64px;
+
+  // ── Component heights ──
+  --arc-height-topnav: 48px;
+  --arc-height-toolbar: 40px;
+  --arc-height-statusbar: 28px;
+  --arc-height-button: 32px;
+
+  // ── Side panel ──
+  --arc-width-sidepanel: 240px;
+
+  // ── Scrollbar ──
+  --arc-scrollbar-thumb: #C9CDD4;
+  --arc-scrollbar-track: transparent;
+
+  // ── Typography ──
+  --arc-font-sans: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
+  --arc-font-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+// ============================================================
+// Dark Theme — override via :root.dark
+// ============================================================
+:root.dark {
+  color-scheme: dark;
+  --arc-brand-blue: #1677FF;
+  --arc-accent-lime-soft: #2A3D1A;
+
+  --arc-success: #00D43A;
+  --arc-warning: #FF9A2E;
+  --arc-danger: #FF5C5C;
+  --arc-info: #86909C;
+
+  --arc-text-primary: #F2F3F5;
+  --arc-text-secondary: #C9CDD4;
+  --arc-text-placeholder: #86909C;
+
+  --arc-bg-page: #141414;
+  --arc-bg-canvas: #1F1F1F;
+  --arc-bg-card: #262626;
+  --arc-bg-soft: #2A2A2A;
+  --arc-bg-hover: #2A2A2A;
+
+  --arc-border: #333333;
+
+  --arc-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --arc-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --arc-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.3);
+
+  --arc-scrollbar-thumb: #434343;
+}
+
+// ── Global Reset ──
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--arc-font-sans);
+  font-size: 14px;
+  line-height: 1.57;
+  color: var(--arc-text-primary);
+  background: var(--arc-bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Custom Scrollbar ──
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--arc-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--arc-scrollbar-thumb);
+  border-radius: var(--arc-radius-full);
+}
+
+.scrollable {
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 200ms ease;
+
+  &:hover {
+    scrollbar-color: var(--arc-scrollbar-thumb) transparent;
+  }
+}
+
+// ── Reduced Motion ──
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+  }
+}
+
+// ── Selection ──
+::selection {
+  background: var(--arc-brand-blue);
+  color: #fff;
+}
+
+// ── Transitions ──
+.app-layout-transition {
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease;
+}

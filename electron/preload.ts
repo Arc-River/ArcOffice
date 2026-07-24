@@ -1,0 +1,71 @@
+import { contextBridge, ipcRenderer } from 'electron'
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  // File operations
+  listDirectory: (dirPath: string) => ipcRenderer.invoke('io:listDirectory', dirPath),
+  readFileText: (filePath: string) => ipcRenderer.invoke('io:readFileText', filePath),
+  openFileDialog: () => ipcRenderer.invoke('dialog:openFile'),
+  selectDirectory: () => ipcRenderer.invoke('dialog:selectDirectory'),
+
+  // Database
+  getConfig: (key: string) => ipcRenderer.invoke('db:getConfig', key),
+  setConfig: (key: string, value: string) => ipcRenderer.invoke('db:setConfig', key, value),
+  getFileHistory: () => ipcRenderer.invoke('db:getFileHistory'),
+  addFileHistory: (file: Record<string, unknown>) => ipcRenderer.invoke('db:addFileHistory', file),
+  createTask: (task: Record<string, unknown>) => ipcRenderer.invoke('db:createTask', task),
+  updateTaskProgress: (id: number, progress: number, status: string) =>
+    ipcRenderer.invoke('db:updateTaskProgress', id, progress, status),
+  getTasks: () => ipcRenderer.invoke('db:getTasks'),
+
+  // AI - Chat
+  chatStream: (params: unknown) => ipcRenderer.invoke('ai:chat', params),
+  onStreamChunk: (callback: (data: { id: string; text: string }) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: { id: string; text: string }) =>
+      callback(data)
+    ipcRenderer.on('ai:stream-chunk', handler)
+    // Return cleanup function
+    return () => ipcRenderer.removeListener('ai:stream-chunk', handler)
+  },
+  onStreamDone: (callback: (data: { id: string }) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: { id: string }) => callback(data)
+    ipcRenderer.on('ai:stream-done', handler)
+    return () => ipcRenderer.removeListener('ai:stream-done', handler)
+  },
+  onStreamError: (callback: (data: { id: string; error: string }) => void) => {
+    const handler = (_event: Electron.IpcRendererEvent, data: { id: string; error: string }) =>
+      callback(data)
+    ipcRenderer.on('ai:stream-error', handler)
+    return () => ipcRenderer.removeListener('ai:stream-error', handler)
+  },
+  removeStreamListeners: () => {
+    ipcRenderer.removeAllListeners('ai:stream-chunk')
+    ipcRenderer.removeAllListeners('ai:stream-done')
+    ipcRenderer.removeAllListeners('ai:stream-error')
+  },
+  // AI - Model storage
+  getAiModels: () => ipcRenderer.invoke('db:getAiModels'),
+  saveAiModels: (models: unknown) => ipcRenderer.invoke('db:saveAiModels', models),
+  getActiveModel: () => ipcRenderer.invoke('db:getActiveModel'),
+  setActiveModel: (modelId: string) => ipcRenderer.invoke('db:setActiveModel', modelId),
+  testConnection: (model: unknown) => ipcRenderer.invoke('ai:testConnection', model),
+
+  // Sessions
+  listSessions: () => ipcRenderer.invoke('sessions:list'),
+  createSession: (name: string) => ipcRenderer.invoke('sessions:create', name),
+  renameSession: (id: string, name: string) => ipcRenderer.invoke('sessions:rename', id, name),
+  deleteSession: (id: string) => ipcRenderer.invoke('sessions:delete', id),
+  getMessages: (sessionId: string) => ipcRenderer.invoke('sessions:getMessages', sessionId),
+  saveMessages: (sessionId: string, messages: unknown) => ipcRenderer.invoke('sessions:saveMessages', sessionId, messages),
+
+  // Prompt templates
+  getPrompts: () => ipcRenderer.invoke('db:getPrompts'),
+  savePrompts: (prompts: unknown) => ipcRenderer.invoke('db:savePrompts', prompts),
+
+  // Skills
+  getSkills: () => ipcRenderer.invoke('db:getSkills'),
+  saveSkills: (skills: unknown) => ipcRenderer.invoke('db:saveSkills', skills),
+
+  // MCP services
+  getMcpServices: () => ipcRenderer.invoke('db:getMcpServices'),
+  saveMcpServices: (services: unknown) => ipcRenderer.invoke('db:saveMcpServices', services),
+})

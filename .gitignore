@@ -1,0 +1,39 @@
+# — 依赖 —
+node_modules/
+
+# — 构建产物 —
+dist/
+dist-ssr/
+*.local
+
+# — Electron —
+dist-electron/
+release/
+*.asar
+
+# — 日志 —
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# — IDE —
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.sw?
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# — 操作系统 —
+.DS_Store
+Thumbs.db
+
+# — 自动生成的类型引用 —
+src/auto-imports.d.ts
+src/components.d.ts
+
+# — 临时文件 —
+.tmp/

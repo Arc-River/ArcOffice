@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArcOffice Design Tokens</title>
+<style>
+  :root {
+    --brand-blue: #1677FF;
+    --ink: #1D2129;
+    --ink-secondary: #4E5969;
+    --ink-placeholder: #86909C;
+    --canvas: #FFFFFF;
+    --page: #F2F3F5;
+    --hairline: #E5E6EB;
+    --hover: #F5F7FA;
+    --surface-card: #FFFFFF;
+    --surface-soft: #F7F8FA;
+
+    --dark-page: #141414;
+    --dark-canvas: #1F1F1F;
+    --dark-ink: #F2F3F5;
+    --dark-ink-secondary: #C9CDD4;
+    --dark-ink-placeholder: #86909C;
+    --dark-hairline: #333333;
+    --dark-hover: #2A2A2A;
+    --dark-surface-card: #262626;
+
+    --success: #00B42A;
+    --warning: #FF7D00;
+    --danger: #F53F3F;
+    --info: #86909C;
+    --dark-success: #00D43A;
+    --dark-warning: #FF9A2E;
+    --dark-danger: #FF5C5C;
+
+    --accent-lime: #D4ED9A;
+    --accent-lilac: #C5B0F4;
+    --accent-lime-soft: #EEF7D4;
+    --dark-accent-lime: #2A3D1A;
+    --dark-accent-lilac: #2D1F4A;
+
+    --scrollbar-thumb: #C9CDD4;
+    --dark-scrollbar-thumb: #434343;
+    --overlay-scrim: #000000;
+
+    --bg-page: var(--page);
+    --bg-card: var(--canvas);
+    --bg-card-alt: var(--surface-soft);
+    --text-primary: var(--ink);
+    --text-secondary: var(--ink-secondary);
+    --text-placeholder: var(--ink-placeholder);
+    --border-color: var(--hairline);
+    --hover-bg: var(--hover);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.08);
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-full: 9999px;
+  }
+
+  .dark {
+    --bg-page: var(--dark-page);
+    --bg-card: var(--dark-canvas);
+    --bg-card-alt: var(--dark-hover);
+    --text-primary: var(--dark-ink);
+    --text-secondary: var(--dark-ink-secondary);
+    --text-placeholder: var(--dark-ink-placeholder);
+    --border-color: var(--dark-hairline);
+    --hover-bg: var(--dark-hover);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.20);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.30);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Layout ─── */
+  .app { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* ─── Header ─── */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 32px; margin-bottom: 40px;
+    background: var(--bg-card); border-radius: var(--radius-xl);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+  }
+  .header-left { display: flex; align-items: center; gap: 20px; }
+  .header-logo { width: 56px; height: 56px; }
+  .header-info h1 { font-size: 24px; font-weight: 600; color: var(--text-primary); }
+  .header-info p { font-size: 14px; color: var(--text-secondary); margin-top: 2px; }
+  .header-info .badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: var(--radius-full);
+    background: var(--brand-blue); color: #fff; margin-top: 6px;
+    letter-spacing: 0.3px;
+  }
+  .theme-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color); background: var(--bg-card);
+    color: var(--text-primary); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .theme-toggle:hover { background: var(--hover-bg); }
+  .theme-toggle .icon { font-size: 18px; line-height: 1; }
+
+  /* ─── Section ─── */
+  .section { margin-bottom: 48px; }
+  .section-header { margin-bottom: 20px; }
+  .section-header h2 {
+    font-size: 20px; font-weight: 600; color: var(--text-primary);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-header h2 .count {
+    font-size: 12px; font-weight: 400; color: var(--text-secondary);
+    background: var(--bg-card-alt); padding: 1px 10px;
+    border-radius: var(--radius-full);
+  }
+  .section-header p { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+  .section-desc {
+    font-size: 13px; color: var(--text-secondary);
+    background: var(--bg-card-alt); padding: 12px 16px;
+    border-radius: var(--radius-lg); margin-bottom: 16px;
+    border-left: 3px solid var(--brand-blue);
+  }
+
+  /* ─── Card Grid ─── */
+  .grid { display: grid; gap: 16px; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-5 { grid-template-columns: repeat(5, 1fr); }
+  .grid-6 { grid-template-columns: repeat(6, 1fr); }
+  .grid-auto { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+
+  .token-card {
+    background: var(--bg-card); border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color); overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .token-card:hover { box-shadow: var(--shadow-md); }
+
+  .token-card .preview {
+    height: 80px; display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .token-card .preview.text-preview {
+    height: auto; min-height: 56px;
+    padding: 16px 16px 12px; justify-content: flex-start;
+  }
+  .token-card .info {
+    padding: 12px 14px; border-top: 1px solid var(--border-color);
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .token-card .info .name {
+    font-size: 12px; font-weight: 600; color: var(--text-primary);
+    font-family: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+  }
+  .token-card .info .value {
+    font-size: 11px; color: var(--text-secondary);
+    font-family: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+  }
+  .token-card .info .use {
+    font-size: 11px; color: var(--ink-placeholder);
+    margin-top: 2px;
+  }
+
+  /* ─── Color Swatch ─── */
+  .swatch-row {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--bg-card); border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color); padding: 14px 16px;
+    transition: box-shadow 0.2s;
+  }
+  .swatch-row:hover { box-shadow: var(--shadow-md); }
+  .swatch {
+    width: 44px; height: 44px; border-radius: var(--radius-md);
+    border: 1px solid var(--border-color); flex-shrink: 0;
+  }
+  .swatch-double {
+    display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
+  }
+  .swatch-double .swatch { width: 44px; height: 20px; }
+  .swatch-row .meta { flex: 1; min-width: 0; }
+  .swatch-row .meta .name { font-size: 13px; font-weight: 600; }
+  .swatch-row .meta .token {
+    font-size: 11px; color: var(--text-secondary);
+    font-family: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+  }
+  .swatch-row .meta .desc { font-size: 12px; color: var(--ink-placeholder); margin-top: 1px; }
+  .swatch-row .hex {
+    font-size: 12px; font-weight: 500;
+    font-family: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+    text-align: right; flex-shrink: 0;
+  }
+
+  /* ─── Typography ─── */
+  .type-row {
+    padding: 16px; border-bottom: 1px solid var(--border-color);
+    display: flex; align-items: center; gap: 20px;
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-row .sample { flex: 1; min-width: 0; }
+  .type-row .meta {
+    text-align: right; flex-shrink: 0; min-width: 200px;
+  }
+  .type-row .meta span {
+    display: block; font-size: 11px; color: var(--text-secondary);
+    font-family: "SF Mono", "JetBrains Mono", "Fira Code", monospace;
+  }
+
+  /* ─── Spacing ─── */
+  .spacing-visual { display: flex; align-items: center; gap: 12px; padding: 16px; }
+  .spacing-bar {
+    height: 8px; border-radius: var(--radius-full);
+    background: var(--brand-blue); opacity: 0.3; flex-shrink: 0;
+  }
+  .spacing-visual .label {
+    font-size: 12px; color: var(--text-secondary);
+  }
+
+  /* ─── Radius ─── */
+  .radius-demo {
+    width: 60px; height: 60px; background: var(--brand-blue);
+    border: none; flex-shrink: 0;
+  }
+
+  /* ─── Shadow Preview ─── */
+  .shadow-preview {
+    width: 80px; height: 60px; background: var(--bg-card);
+    border-radius: var(--radius-lg); flex-shrink: 0;
+  }
+
+  /* ─── Component Demo ─── */
+  .component-demo {
+    padding: 24px; background: var(--bg-page);
+    border-radius: var(--radius-lg); border: 1px solid var(--border-color);
+  }
+  .component-demo .demo-inner {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  }
+  .component-demo .demo-inner.vertical { flex-direction: column; align-items: stretch; }
+
+  /* Button styles */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    height: 32px; padding: 0 16px; border-radius: var(--radius-lg);
+    border: none; cursor: default; white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--brand-blue); color: #fff; }
+  .btn-primary:hover { background: #4096FF; }
+  .btn-secondary {
+    background: var(--bg-card); color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+  .btn-secondary:hover { background: var(--hover-bg); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); padding: 0 12px; }
+  .btn-ghost:hover { background: var(--hover-bg); }
+  .btn-danger { background: var(--danger); color: #fff; }
+
+  /* Tag */
+  .tag {
+    display: inline-flex; align-items: center; height: 22px;
+    padding: 0 8px; border-radius: var(--radius-md);
+    font-size: 12px; font-weight: 500; white-space: nowrap;
+  }
+  .tag-pending { background: var(--hover-bg); color: var(--text-secondary); }
+  .tag-processing { background: #E8F4FF; color: var(--brand-blue); }
+  .tag-success { background: #E8FFE8; color: var(--success); }
+  .tag-warning { background: #FFF3E8; color: var(--warning); }
+  .tag-error { background: #FFE8E8; color: var(--danger); }
+
+  /* Tab */
+  .tab-group { display: flex; border-bottom: 1px solid var(--border-color); }
+  .tab {
+    height: 40px; padding: 0 16px; display: flex; align-items: center;
+    font-size: 14px; font-weight: 500; cursor: default;
+    background: var(--bg-page); color: var(--text-secondary);
+    border-right: 1px solid var(--border-color);
+  }
+  .tab.active {
+    background: var(--bg-card); color: var(--brand-blue);
+    box-shadow: inset 0 -2px 0 var(--brand-blue);
+  }
+
+  /* Input */
+  .demo-input {
+    height: 32px; padding: 4px 11px; border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color); background: var(--bg-card);
+    color: var(--text-primary); font-family: inherit; font-size: 14px;
+    width: 220px; outline: none;
+  }
+  .demo-input:focus { border-color: var(--brand-blue); box-shadow: 0 0 0 2px rgba(22,119,255,0.2); }
+
+  /* Progress */
+  .progress { width: 200px; height: 4px; background: var(--hover-bg); border-radius: var(--radius-full); overflow: hidden; }
+  .progress .fill { height: 100%; background: var(--brand-blue); border-radius: var(--radius-full); width: 60%; }
+
+  /* Chat bubbles */
+  .chat-bubble {
+    max-width: 70%; padding: 12px 16px; border-radius: var(--radius-xl);
+    font-size: 14px; line-height: 1.5; margin: 6px 0;
+  }
+  .chat-bubble.user {
+    background: var(--brand-blue); color: #fff;
+    align-self: flex-end; margin-left: auto;
+  }
+  .chat-bubble.ai {
+    background: var(--accent-lime-soft); color: var(--text-primary);
+    align-self: flex-start;
+  }
+  .dark .chat-bubble.ai { background: var(--dark-accent-lime); color: var(--dark-ink); }
+
+  /* Status bar demo */
+  .status-bar-demo {
+    height: 28px; padding: 0 12px; display: flex; align-items: center;
+    background: var(--bg-page); border-top: 1px solid var(--border-color);
+    font-size: 12px; color: var(--text-secondary); gap: 16px;
+  }
+
+  /* Card demo */
+  .mini-card {
+    background: var(--bg-card); border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color); padding: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .mini-card .title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .mini-card .meta { font-size: 12px; color: var(--text-secondary); }
+
+  /* ─── Logo Preview ─── */
+  .logo-preview {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-page); border-radius: var(--radius-xl);
+    border: 1px solid var(--border-color); padding: 40px;
+    margin-bottom: 24px;
+  }
+  .logo-preview svg { width: 160px; height: 160px; }
+
+  /* ─── Misc ─── */
+  .divider { height: 1px; background: var(--border-color); margin: 40px 0; }
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .gap-4 { gap: 16px; }
+  .items-center { align-items: center; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .mt-4 { margin-top: 16px; }
+  .mb-2 { margin-bottom: 8px; }
+  .w-full { width: 100%; }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4, .grid-5, .grid-6 { grid-template-columns: repeat(2, 1fr); }
+    .header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .type-row { flex-direction: column; align-items: flex-start; }
+    .type-row .meta { text-align: left; min-width: auto; }
+    .swatch-row .hex { display: none; }
+  }
+  @media (max-width: 480px) {
+    .grid-2, .grid-3, .grid-4, .grid-5, .grid-6 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═══ Header ═══ -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-logo" id="logoContainer"></div>
+      <div class="header-info">
+        <h1>ArcOffice</h1>
+        <p>Design Token · 设计令牌全景</p>
+        <span class="badge">α ALPHA</span>
+      </div>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="icon">🌙</span>
+      <span id="themeLabel">切换深色</span>
+    </button>
+  </header>
+
+  <!-- ═══ Logo Preview ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Logo Mark</h2>
+      <p>8 个俄罗斯方块组成的字母 A — 品牌蓝 #1677FF</p>
+    </div>
+    <div class="logo-preview" id="logoPreview"></div>
+  </section>
+
+  <!-- ═══ Colors: Brand & Accent ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Color · Brand &amp; Accent <span class="count">3</span></h2>
+      <p>品牌色是系统中唯一的饱和色，仅用于交互与活跃状态</p>
+    </div>
+    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+      <div class="swatch-row"><div class="swatch" style="background:#1677FF"></div><div class="meta"><div class="name">Brand Blue</div><div class="token">{colors.brand-blue}</div><div class="desc">主色 · 按钮/选中/高亮/焦点</div></div><div class="hex">#1677FF</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#D4ED9A"></div><div class="meta"><div class="name">Accent Lime</div><div class="token">{colors.accent-lime}</div><div class="desc">AI 对话区点缀色</div></div><div class="hex">#D4ED9A</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#C5B0F4"></div><div class="meta"><div class="name">Accent Lilac</div><div class="token">{colors.accent-lilac}</div><div class="desc">AI 功能高亮横幅</div></div><div class="hex">#C5B0F4</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ Colors: Light Theme ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Color · Light Surfaces <span class="count">6</span></h2>
+      <p>浅色主题表面色 — 中性灰白系，内容优先</p>
+    </div>
+    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+      <div class="swatch-row"><div class="swatch" style="background:#F2F3F5;border-color:#d0d1d3"></div><div class="meta"><div class="name">Page</div><div class="token">{colors.page}</div><div class="desc">窗口/侧栏背景</div></div><div class="hex">#F2F3F5</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#FFFFFF;border-color:#d0d1d3"></div><div class="meta"><div class="name">Canvas</div><div class="token">{colors.canvas}</div><div class="desc">卡片/面板/输入框</div></div><div class="hex">#FFFFFF</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#F7F8FA;border-color:#d0d1d3"></div><div class="meta"><div class="name">Surface Soft</div><div class="token">{colors.surface-soft}</div><div class="desc">备用底色</div></div><div class="hex">#F7F8FA</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#F5F7FA;border-color:#d0d1d3"></div><div class="meta"><div class="name">Hover</div><div class="token">{colors.hover}</div><div class="desc">悬浮态背景</div></div><div class="hex">#F5F7FA</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#E5E6EB;border-color:#d0d1d3"></div><div class="meta"><div class="name">Hairline</div><div class="token">{colors.hairline}</div><div class="desc">唯一边框色 1px</div></div><div class="hex">#E5E6EB</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#FFFFFF;border-color:#d0d1d3"></div><div class="meta"><div class="name">Surface Card</div><div class="token">{colors.surface-card}</div><div class="desc">卡片表面</div></div><div class="hex">#FFFFFF</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ Colors: Dark Theme ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Color · Dark Surfaces <span class="count">6</span></h2>
+      <p>深色主题是独立的深灰板岩系，非简单反色</p>
+    </div>
+    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+      <div class="swatch-row"><div class="swatch" style="background:#141414"></div><div class="meta"><div class="name">Dark Page</div><div class="token">{colors.dark-page}</div><div class="desc">深色窗口背景</div></div><div class="hex">#141414</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#1F1F1F"></div><div class="meta"><div class="name">Dark Canvas</div><div class="token">{colors.dark-canvas}</div><div class="desc">深色卡片/面板</div></div><div class="hex">#1F1F1F</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#262626"></div><div class="meta"><div class="name">Dark Card</div><div class="token">{colors.dark-surface-card}</div><div class="desc">深色卡片表面</div></div><div class="hex">#262626</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#2A2A2A"></div><div class="meta"><div class="name">Dark Hover</div><div class="token">{colors.dark-hover}</div><div class="desc">深色悬浮态</div></div><div class="hex">#2A2A2A</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#333333"></div><div class="meta"><div class="name">Dark Hairline</div><div class="token">{colors.dark-hairline}</div><div class="desc">深色边框</div></div><div class="hex">#333333</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#2A3D1A"></div><div class="meta"><div class="name">Dark Accent Lime</div><div class="token">{colors.dark-accent-lime}</div><div class="desc">深色 AI 气泡背景</div></div><div class="hex">#2A3D1A</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ Colors: Text ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Color · Text <span class="count">3</span></h2>
+      <p>层次通过字重和字号区分，从不使用透明度</p>
+    </div>
+    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+      <div class="swatch-row"><div class="swatch-double"><div class="swatch" style="background:#1D2129"></div><div class="swatch" style="background:#F2F3F5"></div></div><div class="meta"><div class="name">Ink · Primary</div><div class="token">{colors.ink} / {colors.dark-ink}</div><div class="desc">主文本</div></div><div class="hex">#1D2129 / #F2F3F5</div></div>
+      <div class="swatch-row"><div class="swatch-double"><div class="swatch" style="background:#4E5969"></div><div class="swatch" style="background:#C9CDD4"></div></div><div class="meta"><div class="name">Ink Secondary</div><div class="token">{colors.ink-secondary} / {colors.dark-ink-secondary}</div><div class="desc">元数据文本</div></div><div class="hex">#4E5969 / #C9CDD4</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#86909C"></div><div class="meta"><div class="name">Ink Placeholder</div><div class="token">{colors.ink-placeholder}</div><div class="desc">占位符 · 深浅共享</div></div><div class="hex">#86909C</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ Colors: Semantic ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Color · Semantic <span class="count">4 + 3 dark</span></h2>
+      <p>功能状态色 — 成功/警告/危险/禁用</p>
+    </div>
+    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+      <div class="swatch-row"><div class="swatch-double"><div class="swatch" style="background:#00B42A"></div><div class="swatch" style="background:#00D43A"></div></div><div class="meta"><div class="name">Success</div><div class="token">{colors.success} / {colors.dark-success}</div></div><div class="hex">#00B42A / #00D43A</div></div>
+      <div class="swatch-row"><div class="swatch-double"><div class="swatch" style="background:#FF7D00"></div><div class="swatch" style="background:#FF9A2E"></div></div><div class="meta"><div class="name">Warning</div><div class="token">{colors.warning} / {colors.dark-warning}</div></div><div class="hex">#FF7D00 / #FF9A2E</div></div>
+      <div class="swatch-row"><div class="swatch-double"><div class="swatch" style="background:#F53F3F"></div><div class="swatch" style="background:#FF5C5C"></div></div><div class="meta"><div class="name">Danger</div><div class="token">{colors.danger} / {colors.dark-danger}</div></div><div class="hex">#F53F3F / #FF5C5C</div></div>
+      <div class="swatch-row"><div class="swatch" style="background:#86909C"></div><div class="meta"><div class="name">Info / Disabled</div><div class="token">{colors.info}</div></div><div class="hex">#86909C</div></div>
+    </div>
+  </section>
+
+  <!-- ═══ Divider ═══ -->
+  <div class="divider"></div>
+
+  <!-- ═══ Typography ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Typography · 字体层级 <span class="count">12</span></h2>
+      <p>纯系统字体栈 (system-ui)，无自定义字体加载。14px body 为基线。</p>
+    </div>
+    <div class="token-card">
+      <div class="type-row">
+        <div class="sample" style="font-size:28px;font-weight:600;line-height:1.3">Display 28/600</div>
+        <div class="meta"><span>{typography.display}</span><span>28px · 600 · 1.30</span><span>页面级标题</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-size:20px;font-weight:600;line-height:1.4">Title-lg 20/600</div>
+        <div class="meta"><span>{typography.title-lg}</span><span>20px · 600 · 1.40</span><span>章节标题/对话框标题</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-size:18px;font-weight:600;line-height:1.45">Title 18/600</div>
+        <div class="meta"><span>{typography.title}</span><span>18px · 600 · 1.45</span><span>卡片标题</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-size:16px;font-weight:600;line-height:1.5">Title-sm 16/600</div>
+        <div class="meta"><span>{typography.title-sm}</span><span>16px · 600 · 1.50</span><span>文件卡片标题</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-size:14px;font-weight:400;line-height:1.57">Body 14/400 — 默认正文，文件列表、设置文本、AI 对话内容</div>
+        <div class="meta"><span>{typography.body}</span><span>14px · 400 · 1.57</span><span>默认正文</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-size:13px;font-weight:400;line-height:1.54;color:var(--text-secondary)">Body-sm 13/400 — 元数据、文件大小、时间戳</div>
+        <div class="meta"><span>{typography.body-sm}</span><span>13px · 400 · 1.54</span><span>次要文本</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-size:12px;font-weight:400;line-height:1.5;color:var(--text-secondary)">Body-xs 12/400 — 状态栏信息</div>
+        <div class="meta"><span>{typography.body-xs}</span><span>12px · 400 · 1.50</span><span>状态栏</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-family:'SF Mono','JetBrains Mono','Fira Code',monospace;font-size:13px;font-weight:400;line-height:1.54">Mono 13/400 — code, 文件路径, JSON</div>
+        <div class="meta"><span>{typography.mono}</span><span>13px · 400 · 1.54</span><span>等宽字体</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-size:14px;font-weight:500;line-height:1.57">Button 14/500 — 按钮标签</div>
+        <div class="meta"><span>{typography.button}</span><span>14px · 500 · 1.57</span><span>按钮</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-size:12px;font-weight:500;line-height:1.5">Label-sm 12/500 — 标签/标签页</div>
+        <div class="meta"><span>{typography.label-sm}</span><span>12px · 500 · 1.50</span><span>标签文本</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-size:14px;font-weight:400;line-height:1.4">File-name 14/400 — 文件名 (紧凑行高)</div>
+        <div class="meta"><span>{typography.file-name}</span><span>14px · 400 · 1.40</span><span>文件名</span></div>
+      </div>
+      <div class="type-row">
+        <div class="sample" style="font-size:14px;font-weight:500;line-height:1.57">Tab-label 14/500 — 文件标签页/导航</div>
+        <div class="meta"><span>{typography.tab-label}</span><span>14px · 500 · 1.57</span><span>标签页</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Divider ═══ -->
+  <div class="divider"></div>
+
+  <!-- ═══ Spacing ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Spacing · 间距系统 <span class="count">9</span></h2>
+      <p>8px 基础单位，所有间距从该数列派生</p>
+    </div>
+    <div class="grid grid-auto">
+      <div class="token-card">
+        <div class="spacing-visual"><div class="spacing-bar" style="width:1px"></div><div class="label">Hair 1px</div></div>
+        <div class="info"><div class="name">spacing.hair</div><div class="value">1px</div></div>
+      </div>
+      <div class="token-card">
+        <div class="spacing-visual"><div class="spacing-bar" style="width:4px"></div><div class="label">xxs 4px</div></div>
+        <div class="info"><div class="name">spacing.xxs</div><div class="value">4px</div></div>
+      </div>
+      <div class="token-card">
+        <div class="spacing-visual"><div class="spacing-bar" style="width:8px"></div><div class="label">xs 8px</div></div>
+        <div class="info"><div class="name">spacing.xs</div><div class="value">8px</div></div>
+      </div>
+      <div class="token-card">
+        <div class="spacing-visual"><div class="spacing-bar" style="width:12px"></div><div class="label">sm 12px</div></div>
+        <div class="info"><div class="name">spacing.sm</div><div class="value">12px</div></div>
+      </div>
+      <div class="token-card">
+        <div class="spacing-visual"><div class="spacing-bar" style="width:16px"></div><div class="label">md 16px</div></div>
+        <div class="info"><div class="name">spacing.md</div><div class="value">16px</div></div>
+      </div>
+      <div class="token-card">
+        <div class="spacing-visual"><div class="spacing-bar" style="width:24px"></div><div class="label">lg 24px</div></div>
+        <div class="info"><div class="name">spacing.lg</div><div class="value">24px</div></div>
+      </div>
+      <div class="token-card">
+        <div class="spacing-visual"><div class="spacing-bar" style="width:32px"></div><div class="label">xl 32px</div></div>
+        <div class="info"><div class="name">spacing.xl</div><div class="value">32px</div></div>
+      </div>
+      <div class="token-card">
+        <div class="spacing-visual"><div class="spacing-bar" style="width:48px"></div><div class="label">xxl 48px</div></div>
+        <div class="info"><div class="name">spacing.xxl</div><div class="value">48px</div></div>
+      </div>
+      <div class="token-card">
+        <div class="spacing-visual"><div class="spacing-bar" style="width:64px"></div><div class="label">Section 64px</div></div>
+        <div class="info"><div class="name">spacing.section</div><div class="value">64px</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Border Radius ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Border Radius · 圆角 <span class="count">9</span></h2>
+      <p>8px (lg) 为默认圆角。无 pill 形按钮。</p>
+    </div>
+    <div class="grid grid-auto">
+      <div class="token-card"><div class="preview"><div class="radius-demo" style="border-radius:0;background:var(--brand-blue)"></div></div><div class="info"><div class="name">rounded.none</div><div class="value">0px</div><div class="use">标签页/状态栏</div></div></div>
+      <div class="token-card"><div class="preview"><div class="radius-demo" style="border-radius:2px;background:var(--brand-blue)"></div></div><div class="info"><div class="name">rounded.sm</div><div class="value">2px</div><div class="use">标签内角</div></div></div>
+      <div class="token-card"><div class="preview"><div class="radius-demo" style="border-radius:4px;background:var(--brand-blue)"></div></div><div class="info"><div class="name">rounded.md / tag</div><div class="value">4px</div><div class="use">状态标签</div></div></div>
+      <div class="token-card"><div class="preview"><div class="radius-demo" style="border-radius:8px;background:var(--brand-blue)"></div></div><div class="info"><div class="name">rounded.lg / card</div><div class="value">8px</div><div class="use">默认 · 按钮/卡片/输入框</div></div></div>
+      <div class="token-card"><div class="preview"><div class="radius-demo" style="border-radius:12px;background:var(--brand-blue)"></div></div><div class="info"><div class="name">rounded.xl / dialog</div><div class="value">12px</div><div class="use">对话框/AI 气泡</div></div></div>
+      <div class="token-card"><div class="preview"><div class="radius-demo" style="border-radius:20px;background:var(--brand-blue);width:60px;height:32px"></div></div><div class="info"><div class="name">rounded.pill</div><div class="value">20px</div><div class="use">徽标/进度条</div></div></div>
+      <div class="token-card"><div class="preview"><div class="radius-demo" style="border-radius:9999px;background:var(--brand-blue);width:44px;height:44px"></div></div><div class="info"><div class="name">rounded.full</div><div class="value">9999px</div><div class="use">滚动条/圆形</div></div></div>
+    </div>
+  </section>
+
+  <!-- ═══ Divider ═══ -->
+  <div class="divider"></div>
+
+  <!-- ═══ Elevation ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Elevation · 阴影层级 <span class="count">4</span></h2>
+      <p>系统是轻阴影设计 — 发丝线替代了传统桌面应用的阴影</p>
+    </div>
+    <div class="grid grid-2">
+      <div class="token-card">
+        <div class="preview"><div style="width:80px;height:60px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-card)"></div></div>
+        <div class="info"><div class="name">Level 0 · Flat</div><div class="value">无阴影无边框</div><div class="use">页面/画布背景</div></div>
+      </div>
+      <div class="token-card">
+        <div class="preview"><div style="width:80px;height:60px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-card)"></div></div>
+        <div class="info"><div class="name">Level 1 · Hairline</div><div class="value">1px 发丝线</div><div class="use">卡片/工具栏/输入框</div></div>
+      </div>
+      <div class="token-card">
+        <div class="preview"><div style="width:80px;height:60px;border-radius:8px;background:var(--bg-card);box-shadow:var(--shadow-md)"></div></div>
+        <div class="info"><div class="name">Level 2 · Subtle</div><div class="value" style="font-size:10px">0 2px 8px rgba(0,0,0,0.06) / 0.20</div><div class="use">文档预览/下拉菜单</div></div>
+      </div>
+      <div class="token-card">
+        <div class="preview"><div style="width:80px;height:60px;border-radius:12px;background:var(--bg-card);box-shadow:var(--shadow-lg)"></div></div>
+        <div class="info"><div class="name">Level 3 · Modal</div><div class="value" style="font-size:10px">0 8px 40px rgba(0,0,0,0.12) / 0.40</div><div class="use">对话框/侧面板</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Divider ═══ -->
+  <div class="divider"></div>
+
+  <!-- ═══ Components ═══ -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Components · 组件预览 <span class="count">9</span></h2>
+      <p>核心组件在浅色/深色主题下的实际渲染效果</p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="section-desc">Buttons · 32px 标准高度，8px 圆角，无 pill</div>
+    <div class="token-card">
+      <div class="component-demo">
+        <div class="demo-inner">
+          <button class="btn btn-primary">Primary</button>
+          <button class="btn btn-secondary">Secondary</button>
+          <button class="btn btn-ghost">Ghost</button>
+          <button class="btn btn-danger">Danger</button>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2"></div>
+
+    <!-- Tags -->
+    <div class="section-desc">Status Tags · 22px 高度，4px 圆角</div>
+    <div class="token-card">
+      <div class="component-demo">
+        <div class="demo-inner">
+          <span class="tag tag-pending">Pending</span>
+          <span class="tag tag-processing">Processing</span>
+          <span class="tag tag-success">Completed</span>
+          <span class="tag tag-warning">Warning</span>
+          <span class="tag tag-error">Failed</span>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2"></div>
+
+    <!-- Document Tabs -->
+    <div class="section-desc">Document Tabs · 零圆角，激活态 2px 蓝色底边</div>
+    <div class="token-card">
+      <div class="component-demo">
+        <div class="tab-group">
+          <div class="tab">README.md</div>
+          <div class="tab active">report.docx</div>
+          <div class="tab">data.xlsx</div>
+          <div class="tab">slides.pptx</div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2"></div>
+
+    <!-- Inputs -->
+    <div class="section-desc">Inputs · 8px 圆角，聚焦时蓝色边框 + 2px ring</div>
+    <div class="token-card">
+      <div class="component-demo">
+        <div class="demo-inner">
+          <input class="demo-input" placeholder="Search files..." value="">
+          <input class="demo-input" placeholder="Focused state" style="border-color:var(--brand-blue);box-shadow:0 0 0 2px rgba(22,119,255,0.2)">
+        </div>
+      </div>
+    </div>
+    <div class="mt-2"></div>
+
+    <!-- Progress -->
+    <div class="section-desc">Progress Bar · 4px 高，pill 圆角</div>
+    <div class="token-card">
+      <div class="component-demo">
+        <div class="demo-inner">
+          <div class="progress"><div class="fill"></div></div>
+          <span style="font-size:12px;color:var(--text-secondary)">60%</span>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2"></div>
+
+    <!-- Cards -->
+    <div class="section-desc">File Card · 发丝线边框，无阴影</div>
+    <div class="token-card">
+      <div class="component-demo">
+        <div class="demo-inner">
+          <div class="mini-card" style="width:200px">
+            <div class="title">📄 设计稿_v3.docx</div>
+            <div class="meta">2.4 MB · 2026-07-24</div>
+          </div>
+          <div class="mini-card" style="width:200px">
+            <div class="title">📊 季度报表.xlsx</div>
+            <div class="meta">856 KB · 2026-07-23</div>
+          </div>
+          <div class="mini-card" style="width:200px">
+            <div class="title">🎨 提案展示.pptx</div>
+            <div class="meta">12.6 MB · 2026-07-22</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2"></div>
+
+    <!-- AI Chat Bubbles -->
+    <div class="section-desc">AI Chat · 品牌蓝用户气泡 / 青柠色助手气泡，12px 圆角</div>
+    <div class="token-card">
+      <div class="component-demo">
+        <div class="demo-inner vertical" style="max-width:500px">
+          <div class="chat-bubble ai">你好！我是 ArcOffice AI，可以帮你处理文档。有什么需要吗？</div>
+          <div class="chat-bubble user">帮我总结这份文档的要点</div>
+          <div class="chat-bubble ai">好的，我可以接入你的文档进行分析。请先打开或拖入一份文档。</div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2"></div>
+
+    <!-- Status Bar -->
+    <div class="section-desc">Status Bar · 28px 高，12px 字体</div>
+    <div class="token-card">
+      <div class="component-demo" style="padding:0">
+        <div class="status-bar-demo">
+          <span>~/Documents/report.docx</span>
+          <span>UTF-8</span>
+          <span>Ln 42, Col 15</span>
+          <span style="margin-left:auto;display:flex;align-items:center;gap:4px">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;border:2px solid var(--brand-blue);border-top-color:transparent;animation:spin 0.8s linear infinite"></span>
+            2 tasks
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2"></div>
+
+    <!-- Dialog -->
+    <div class="section-desc">Dialog · 480px 默认宽度，12px 圆角，level-3 阴影</div>
+    <div class="token-card">
+      <div class="component-demo">
+        <div style="background:var(--bg-card);border-radius:12px;border:1px solid var(--border-color);padding:24px;max-width:480px;box-shadow:var(--shadow-lg)">
+          <div style="font-size:20px;font-weight:600;margin-bottom:16px">确认删除</div>
+          <div style="font-size:14px;color:var(--text-secondary);margin-bottom:24px">确定要删除 "report.docx" 吗？此操作不可撤销。</div>
+          <div style="display:flex;gap:12px;justify-content:flex-end">
+            <button class="btn btn-secondary">取消</button>
+            <button class="btn btn-danger">删除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <div class="divider"></div>
+  <footer style="text-align:center;padding:24px 0;font-size:12px;color:var(--text-secondary)">
+    ArcOffice Design System · Alpha · 2026-07 · 基于 Tauri + Vue3 + Rust 构建
+  </footer>
+
+</div>
+
+<script>
+  // ─── Load Logo ───
+  fetch('logo.svg')
+    .then(r => r.text())
+    .then(svg => {
+      document.getElementById('logoPreview').innerHTML = svg;
+      document.getElementById('logoContainer').innerHTML = svg;
+    });
+
+  // ─── Theme Toggle ───
+  function toggleTheme() {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    document.querySelector('.theme-toggle .icon').textContent = isDark ? '☀️' : '🌙';
+    document.getElementById('themeLabel').textContent = isDark ? '切换浅色' : '切换深色';
+  }
+
+  // Detect system preference
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.classList.add('dark');
+    document.querySelector('.theme-toggle .icon').textContent = '☀️';
+    document.getElementById('themeLabel').textContent = '切换浅色';
+  }
+
+  // ─── Spin animation ───
+  const style = document.createElement('style');
+  style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
