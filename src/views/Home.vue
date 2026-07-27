@@ -2,9 +2,11 @@
 // biome-ignore lint/correctness/noUnusedImports: used in template only
 import { DataAnalysis, Document, Film } from '@element-plus/icons-vue'
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const { t } = useI18n()
 
 // biome-ignore lint/correctness/noUnusedVariables: used in template
 const recentFiles = ref<{ name: string; type: string; size: string; date: string }[]>([])
@@ -48,17 +50,17 @@ function openFile() {
         <img src="/logo.svg" alt="ArcOffice" width="64" height="64" />
       </div>
       <h1 class="home__title">ArcOffice</h1>
-      <p class="home__subtitle">对话式 Office 文件处理工具</p>
+      <p class="home__subtitle">{{ t('home.subtitle') }}</p>
       <div class="home__actions">
         <el-button type="primary" size="large" @click="router.push('/chat')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;">
             <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm-1 4v3H8v2h3v3h2v-3h3v-2h-3V8h-2z" />
           </svg>
-          开始对话
+          {{ t('home.startChat') }}
         </el-button>
-        <el-button size="large" @click="openFile">打开文件</el-button>
+        <el-button size="large" @click="openFile">{{ t('home.openFile') }}</el-button>
       </div>
-      <p class="home__hint">拖入文件开始，或选择已有文件</p>
+      <p class="home__hint">{{ t('home.dropHint') }}</p>
     </div>
 
     <div class="home__drop-zone" v-if="isDragOver">
@@ -69,12 +71,12 @@ function openFile() {
           <rect x="2" y="14" width="8" height="8" rx="1.5" fill="var(--arc-brand-blue)" opacity="0.7" />
           <rect x="14" y="14" width="8" height="8" rx="1.5" fill="var(--arc-brand-blue)" />
         </svg>
-        <p class="home__drop-text">释放文件以打开</p>
+        <p class="home__drop-text">{{ t('home.dropOverlay') }}</p>
       </div>
     </div>
 
     <div class="home__recent" v-if="recentFiles.length > 0">
-      <h2 class="home__recent-title">最近文件</h2>
+      <h2 class="home__recent-title">{{ t('home.recentFiles') }}</h2>
       <div class="home__recent-list">
         <div
           v-for="file in recentFiles"

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  ArrowRight,
   ArrowUp,
   ChatLineSquare,
   DataAnalysis,
@@ -8,12 +7,16 @@ import {
   Film,
   Folder,
   FolderOpened,
+  Pointer,
   Search,
 } from '@element-plus/icons-vue'
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { formatFileSize, formatSmartDate } from '@/utils/format'
 import { getElectronAPI } from '@/utils/ipc'
+
+const { t } = useI18n()
 
 const api = getElectronAPI()
 const router = useRouter()
@@ -41,11 +44,11 @@ const error = ref('')
 const workingDir = ref('')
 
 const categories: CategoryItem[] = [
-  { key: 'all', label: '全部', icon: Folder },
-  { key: 'doc', label: '文档', icon: Document },
-  { key: 'xls', label: '表格', icon: DataAnalysis },
-  { key: 'ppt', label: '演示', icon: Film },
-  { key: 'other', label: '其他', icon: FolderOpened },
+  { key: 'all', label: t('files.categories.all'), icon: Folder },
+  { key: 'doc', label: t('files.categories.doc'), icon: Document },
+  { key: 'xls', label: t('files.categories.xls'), icon: DataAnalysis },
+  { key: 'ppt', label: t('files.categories.ppt'), icon: Film },
+  { key: 'other', label: t('files.categories.other'), icon: FolderOpened },
 ]
 
 const fileTypeIcon: Record<string, unknown> = {
@@ -165,7 +168,7 @@ function handleFileAction(entry: FileEntry) {
 
 onMounted(async () => {
   if (!api) {
-    error.value = '未检测到 Electron API'
+    error.value = t('files.noElectron')
     return
   }
   try {
@@ -174,10 +177,10 @@ onMounted(async () => {
       workingDir.value = dir
       await loadDirectory(dir)
     } else {
-      error.value = '请先在「设置 → 通用」中配置工作目录'
+      error.value = t('files.noWorkDir')
     }
   } catch {
-    error.value = '加载工作目录失败'
+    error.value = t('files.loadFailed')
   }
 })
 </script>
@@ -185,7 +188,7 @@ onMounted(async () => {
 <template>
   <div class="files">
     <div class="files__sidebar">
-      <div class="files__sidebar-header">分类</div>
+      <div class="files__sidebar-header">{{ t('files.sidebarTitle') }}</div>
       <div class="files__categories">
         <button
           v-for="cat in categories"
@@ -203,7 +206,7 @@ onMounted(async () => {
       <div class="files__toolbar">
         <el-input
           v-model="searchQuery"
-          placeholder="搜索文件…"
+          :placeholder="t('files.searchPlaceholder')"
           size="small"
           clearable
           :prefix-icon="Search"
@@ -215,13 +218,13 @@ onMounted(async () => {
           circle
           text
           size="small"
-          title="返回上级"
+          :title="t('files.goUp')"
           @click="goUp"
           :disabled="currentPath === workingDir"
         />
       </div>
 
-      <el-breadcrumb v-if="breadcrumbs.length > 0" class="files__breadcrumb" separator-icon="ArrowRight">
+      <el-breadcrumb v-if="breadcrumbs.length > 0" class="files__breadcrumb" :separator-icon="ArrowRight">
         <el-breadcrumb-item v-for="(crumb, idx) in breadcrumbs" :key="crumb.path">
           <a
             class="files__breadcrumb-link"
@@ -232,7 +235,7 @@ onMounted(async () => {
       </el-breadcrumb>
 
       <div v-if="loading" class="files__empty">
-        <p class="files__empty-text">加载中…</p>
+        <p class="files__empty-text">{{ t('files.loading') }}</p>
       </div>
       <div v-else-if="error" class="files__empty">
         <el-icon class="files__empty-icon" :size="48" color="var(--arc-danger)"><FolderOpened /></el-icon>
@@ -240,7 +243,7 @@ onMounted(async () => {
       </div>
       <div v-else-if="filteredEntries.length === 0" class="files__empty">
         <el-icon class="files__empty-icon" :size="48" color="var(--arc-text-placeholder)"><FolderOpened /></el-icon>
-        <p class="files__empty-text">{{ searchQuery ? '无匹配文件' : '文件夹为空' }}</p>
+        <p class="files__empty-text">{{ searchQuery ? t('files.noMatch') : t('files.emptyFolder') }}</p>
       </div>
       <div v-else class="files__list">
         <div
@@ -255,10 +258,10 @@ onMounted(async () => {
           </span>
           <div class="files__item-info">
             <div class="files__item-name">{{ entry.name }}</div>
-            <div class="files__item-meta">{{ entry.isDir ? '文件夹' : formatFileSize(entry.size) }} · {{ formatSmartDate(entry.mtime) }}</div>
+            <div class="files__item-meta">{{ entry.isDir ? t('files.folder') : formatFileSize(entry.size) }} · {{ formatSmartDate(entry.mtime) }}</div>
           </div>
-          <el-button plain @click.stop="handleFileAction(entry)" type="primary" size="small" :icon="entry.isDir ? ArrowRight : ChatLineSquare">
-            {{ entry.isDir ? '打开' : '对话' }}
+          <el-button text @click.stop="handleFileAction(entry)" :type="entry.isDir ? 'success' : 'primary'" size="small" :icon="entry.isDir ? Pointer : ChatLineSquare">
+            {{ entry.isDir ? t('files.open') : t('files.chatAction') }}
           </el-button>
         </div>
       </div>

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 import { useCrudList } from '@/composables/useCrudList'
 import type { SkillItem } from '@/types/ai'
 import { getElectronAPI } from '@/utils/ipc'
 import { getSkillColor, getSkillIcon } from '@/utils/skill-icons'
 
 const api = getElectronAPI()
+const { t } = useI18n()
 
 const crud = useCrudList<SkillItem>({
   load: () => (api ? api.getSkills() : Promise.resolve([])),
@@ -20,14 +22,14 @@ const crud = useCrudList<SkillItem>({
     created_at: '',
   }),
   getName: (s) => s.name,
-  entityName: '技能',
+  entityName: t('settings.skills.title'),
 })
 
 async function saveForm() {
   const name = crud.form.value.name.trim()
   const description = crud.form.value.description.trim()
   if (!name || !description) {
-    ElMessage.warning('请填写完整信息')
+    ElMessage.warning(t('settings.skills.validate'))
     return
   }
 
@@ -45,7 +47,7 @@ async function handleToggle(skill: SkillItem) {
 
 async function handleDelete(skill: SkillItem) {
   if (skill.builtin) {
-    ElMessage.info('内置技能不可删除，可在列表中关闭')
+    ElMessage.info(t('settings.skills.builtinNotDeletable'))
     return
   }
   await crud.handleDelete(skill)
@@ -55,13 +57,13 @@ async function handleDelete(skill: SkillItem) {
 <template>
   <div class="settings-page">
     <div class="settings-page__header">
-      <h2 class="settings-page__title">Skills 管理</h2>
-      <el-button type="primary" size="small" @click="crud.openNewForm()">新建</el-button>
+      <h2 class="settings-page__title">{{ t('settings.skills.title') }}</h2>
+      <el-button type="primary" size="small" @click="crud.openNewForm()">{{ t('settings.skills.add') }}</el-button>
     </div>
-    <p class="settings-page__desc">文档操作技能，AI 通过对话调用。关闭的技能不会出现在 AI 的可用工具列表中。</p>
+    <p class="settings-page__desc">{{ t('settings.skills.desc') }}</p>
 
     <div v-if="crud.items.value.length === 0" class="settings-page__empty">
-      <p>暂无技能，点击上方按钮创建</p>
+      <p>{{ t('settings.skills.empty') }}</p>
     </div>
 
     <div v-else class="settings-page__section">
@@ -74,9 +76,9 @@ async function handleDelete(skill: SkillItem) {
         <div class="settings-page__skill-info">
           <div class="settings-page__skill-name">
             {{ s.name }}
-            <el-tag v-if="s.builtin" size="small" type="info" class="settings-page__builtin-tag">内置</el-tag>
-            <el-tag v-if="s.content" size="small" type="warning" effect="plain">有指令</el-tag>
-            <el-tag v-else size="small" effect="plain">无指令</el-tag>
+            <el-tag v-if="s.builtin" size="small" type="info" class="settings-page__builtin-tag">{{ t('settings.skills.builtin') }}</el-tag>
+            <el-tag v-if="s.content" size="small" type="warning" effect="plain">{{ t('settings.skills.hasInstructions') }}</el-tag>
+            <el-tag v-else size="small" effect="plain">{{ t('settings.skills.noInstructions') }}</el-tag>
           </div>
           <div class="settings-page__skill-desc">{{ s.description }}</div>
         </div>
@@ -98,11 +100,11 @@ async function handleDelete(skill: SkillItem) {
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item :disabled="s.builtin" command="edit">
-                编辑
-                <template v-if="s.builtin">（内置不可编辑）</template>
+                {{ t('settings.skills.edit') }}
+                <template v-if="s.builtin">{{ t('settings.skills.builtinNotEditable') }}</template>
               </el-dropdown-item>
               <el-dropdown-item command="delete" divided :style="{ color: s.builtin ? 'var(--el-color-info)' : 'var(--el-color-danger)' }">
-                {{ s.builtin ? '不可删除' : '删除' }}
+                {{ s.builtin ? t('settings.skills.cannotDelete') : t('settings.skills.delete') }}
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -113,43 +115,43 @@ async function handleDelete(skill: SkillItem) {
     <!-- Add / Edit Dialog -->
     <el-dialog
       v-model="crud.showDialog.value"
-      :title="crud.editingId.value ? '编辑技能' : '新建技能'"
+      :title="crud.editingId.value ? t('settings.skills.editTitle') : t('settings.skills.addTitle')"
       width="520px"
       :close-on-click-modal="false"
       @close="crud.cancelForm()"
     >
       <el-form :model="crud.form.value" label-position="top">
-        <el-form-item label="技能名称">
+        <el-form-item :label="t('settings.skills.name')">
           <el-input
             v-model="crud.form.value.name"
-            placeholder="技能标识，如 document-edit"
+            :placeholder="t('settings.skills.namePlaceholder')"
             maxlength="50"
             show-word-limit
           />
         </el-form-item>
-        <el-form-item label="描述">
+        <el-form-item :label="t('settings.skills.descLabel')">
           <el-input
             v-model="crud.form.value.description"
             type="textarea"
             :rows="3"
-            placeholder="描述这个技能的功能和用途"
+            :placeholder="t('settings.skills.descPlaceholder')"
           />
         </el-form-item>
-        <el-form-item label="技能指令">
-          <div class="settings-page__content-hint">技能指令将注入到 AI 的 system prompt 中，指导 AI 如何执行该技能。支持 Markdown 格式。</div>
+        <el-form-item :label="t('settings.skills.instructions')">
+          <div class="settings-page__content-hint">{{ t('settings.skills.instructionsDesc') }}</div>
           <el-input
             v-model="crud.form.value.content"
             type="textarea"
             :rows="8"
-            placeholder="编写详细的操作指南和规则，AI 将在对话中参考这些指令。"
+            :placeholder="t('settings.skills.instructionsPlaceholder')"
             maxlength="10000"
             show-word-limit
           />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="crud.cancelForm()">取消</el-button>
-        <el-button type="primary" @click="saveForm">保存</el-button>
+        <el-button @click="crud.cancelForm()">{{ t('settings.skills.cancel') }}</el-button>
+        <el-button type="primary" @click="saveForm">{{ t('settings.skills.save') }}</el-button>
       </template>
     </el-dialog>
   </div>

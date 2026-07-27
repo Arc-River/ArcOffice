@@ -14,8 +14,11 @@
 
 import MarkdownRender from 'markstream-vue'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/stores/theme'
 import { chatPreset, codeBlockThemes } from '@/utils/markstream'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   node?: Record<string, unknown>
@@ -58,7 +61,7 @@ const innerContent = computed(() => {
           <path d="M12 22v-5" />
         </svg>
       </span>
-      <span class="thinking-block__label">思考过程</span>
+      <span class="thinking-block__label">{{ t('chat.thinkingLabel') }}</span>
       <span class="thinking-block__arrow">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
           <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />

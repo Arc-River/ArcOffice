@@ -1,18 +1,24 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/stores/theme'
 import { getElectronAPI } from '@/utils/ipc'
 
 const api = getElectronAPI()
+const { t, locale } = useI18n()
 // biome-ignore lint/correctness/noUnusedVariables: used in template
 const themeStore = useThemeStore()
 // biome-ignore lint/correctness/noUnusedVariables: used in template
 const autoSave = ref(true)
 // biome-ignore lint/correctness/noUnusedVariables: used in template
 const restoreSession = ref(true)
-// biome-ignore lint/correctness/noUnusedVariables: used in template
-const language = ref('zh-CN')
+const language = ref(locale.value)
+
+watch(language, (val) => {
+  locale.value = val
+  localStorage.setItem('arc-locale', val)
+})
 const workingDir = ref('')
 
 // Web Search config
@@ -59,9 +65,9 @@ async function saveWebSearch() {
   wsSaving.value = true
   try {
     await api.setConfig('web_search_config', JSON.stringify({ provider: wsProvider.value, api_key: wsApiKey.value }))
-    ElMessage.success('Web Search 配置已保存')
+    ElMessage.success(t('settings.general.saveSuccess'))
   } catch {
-    ElMessage.error('保存失败')
+    ElMessage.error(t('settings.general.saveFailed'))
   } finally {
     wsSaving.value = false
   }
@@ -70,45 +76,46 @@ async function saveWebSearch() {
 
 <template>
   <div class="settings-page">
-    <h2 class="settings-page__title">通用设置</h2>
+    <h2 class="settings-page__title">{{ t('settings.general.title') }}</h2>
     <div class="settings-page__section">
       <div class="settings-page__row">
         <div>
-          <div class="settings-page__row-label">自动保存</div>
-          <div class="settings-page__row-desc">修改后自动保存文档</div>
+          <div class="settings-page__row-label">{{ t('settings.general.autoSave') }}</div>
+          <div class="settings-page__row-desc">{{ t('settings.general.autoSaveDesc') }}</div>
         </div>
         <el-switch v-model="autoSave" />
       </div>
       <div class="settings-page__row">
         <div>
-          <div class="settings-page__row-label">启动时恢复上次会话</div>
-          <div class="settings-page__row-desc">重新打开时自动恢复对话</div>
+          <div class="settings-page__row-label">{{ t('settings.general.restoreSession') }}</div>
+          <div class="settings-page__row-desc">{{ t('settings.general.restoreSessionDesc') }}</div>
         </div>
         <el-switch v-model="restoreSession" />
       </div>
       <div class="settings-page__row">
         <div>
-          <div class="settings-page__row-label">界面语言</div>
-          <div class="settings-page__row-desc">界面显示语言</div>
+          <div class="settings-page__row-label">{{ t('settings.general.language') }}</div>
+          <div class="settings-page__row-desc">{{ t('settings.general.languageDesc') }}</div>
         </div>
         <el-select v-model="language" size="small" style="width: 140px">
-          <el-option value="zh-CN" label="简体中文" />
+          <el-option value="zh-CN" :label="t('settings.general.zhCN')" />
+          <el-option value="en" :label="t('settings.general.en')" />
         </el-select>
       </div>
       <div class="settings-page__row">
         <div>
-          <div class="settings-page__row-label">工作目录</div>
-          <div class="settings-page__row-desc">AI 文件操作和文件浏览的工作空间</div>
+          <div class="settings-page__row-label">{{ t('settings.general.workDir') }}</div>
+          <div class="settings-page__row-desc">{{ t('settings.general.workDirDesc') }}</div>
         </div>
         <div class="settings-page__dir-picker">
-          <span class="settings-page__dir-path" :title="workingDir">{{ workingDir || '未设置' }}</span>
-          <el-button size="small" @click="selectWorkingDir">选择目录</el-button>
+          <span class="settings-page__dir-path" :title="workingDir">{{ workingDir || t('settings.general.workDirNotSet') }}</span>
+          <el-button size="small" @click="selectWorkingDir">{{ t('settings.general.selectDir') }}</el-button>
         </div>
       </div>
       <div class="settings-page__row">
         <div>
-          <div class="settings-page__row-label">主题模式</div>
-          <div class="settings-page__row-desc">选择浅色、深色或跟随系统</div>
+          <div class="settings-page__row-label">{{ t('settings.general.themeMode') }}</div>
+          <div class="settings-page__row-desc">{{ t('settings.general.themeDesc') }}</div>
         </div>
         <el-select
           :model-value="themeStore.mode"
@@ -116,20 +123,20 @@ async function saveWebSearch() {
           size="small"
           style="width: 140px"
         >
-          <el-option value="light" label="浅色" />
-          <el-option value="dark" label="深色" />
-          <el-option value="auto" label="跟随系统" />
+          <el-option value="light" :label="t('settings.general.light')" />
+          <el-option value="dark" :label="t('settings.general.dark')" />
+          <el-option value="auto" :label="t('settings.general.followSystem')" />
         </el-select>
       </div>
     </div>
 
     <!-- Web Search 配置 -->
-    <h2 class="settings-page__title" style="margin-top: var(--arc-space-lg)">Web Search</h2>
+    <h2 class="settings-page__title" style="margin-top: var(--arc-space-lg)">{{ t('settings.general.webSearchProvider') }}</h2>
     <div class="settings-page__section">
       <div class="settings-page__row">
         <div>
-          <div class="settings-page__row-label">搜索服务商</div>
-          <div class="settings-page__row-desc">目前仅支持 Tavily</div>
+          <div class="settings-page__row-label">{{ t('settings.general.webSearchProvider') }}</div>
+          <div class="settings-page__row-desc">{{ t('settings.general.webSearchProviderDesc') }}</div>
         </div>
         <el-select v-model="wsProvider" size="small" style="width: 140px" disabled>
           <el-option value="tavily" label="Tavily" />
@@ -151,7 +158,7 @@ async function saveWebSearch() {
             clearable
           />
           <el-button size="small" type="primary" :loading="wsSaving" @click="saveWebSearch">
-            保存
+            {{ t('settings.general.save') }}
           </el-button>
         </div>
       </div>

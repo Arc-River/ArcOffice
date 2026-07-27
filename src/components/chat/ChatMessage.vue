@@ -9,6 +9,9 @@ const props = defineProps<{
   isStreaming?: boolean
 }>()
 
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 const themeStore = useThemeStore()
 </script>
 
@@ -27,7 +30,7 @@ const themeStore = useThemeStore()
       </svg>
     </div>
     <div class="chat-message__content">
-      <div v-if="role === 'tool'" class="chat-message__tool-label">系统</div>
+      <div v-if="role === 'tool'" class="chat-message__tool-label">{{ t('chat.systemTag') }}</div>
 
       <!-- 用户/工具消息：纯文本 -->
       <template v-if="role !== 'assistant'">{{ content }}</template>

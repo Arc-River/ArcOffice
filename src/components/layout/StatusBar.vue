@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getElectronAPI } from '@/utils/ipc'
+
+const { t } = useI18n()
 
 const activeModel = ref('')
 
@@ -10,21 +13,21 @@ onMounted(async () => {
   try {
     const modelId = await api.getActiveModel()
     if (!modelId) {
-      activeModel.value = '未配置模型'
+      activeModel.value = t('status.noModel')
       return
     }
     const models = await api.getAiModels()
     const found = models.find((m: { id: string; name: string }) => m.id === modelId)
-    activeModel.value = found ? found.name : '未配置模型'
+    activeModel.value = found ? found.name : t('status.noModel')
   } catch {
-    activeModel.value = '未配置模型'
+    activeModel.value = t('status.noModel')
   }
 })
 </script>
 
 <template>
   <footer class="status-bar">
-    <span class="status-bar__item">ArcOffice v0.1.0</span>
+    <span class="status-bar__item">{{ t('status.version') }}</span>
     <span class="status-bar__item status-bar__item--center">{{ activeModel }}</span>
   </footer>
 </template>

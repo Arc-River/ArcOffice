@@ -89,7 +89,7 @@ class MCPClientConnection extends EventEmitter {
 
     const initResponse = initResult as { protocolVersion?: string }
     if (!initResponse?.protocolVersion) {
-      throw new Error(`MCP ${this.config.name}: 初始化失败，服务器返回无效响应`)
+      throw new Error(`MCP ${this.config.name}: Initialization failed, server returned invalid response`)
     }
 
     // Send initialized notification (fire-and-forget)
@@ -102,7 +102,7 @@ class MCPClientConnection extends EventEmitter {
    * Discover available tools from the MCP server.
    */
   async listTools(): Promise<MCPToolDefinition[]> {
-    if (!this.connected) throw new Error(`MCP ${this.config.name}: 未连接`)
+    if (!this.connected) throw new Error(`MCP ${this.config.name}: Not connected`)
 
     const result = await this.request('tools/list') as { tools?: MCPTool[] }
     const tools = result?.tools || []
@@ -120,7 +120,7 @@ class MCPClientConnection extends EventEmitter {
    * Call a tool on the MCP server.
    */
   async callTool(toolName: string, args: Record<string, unknown>): Promise<unknown> {
-    if (!this.connected) throw new Error(`MCP ${this.config.name}: 未连接`)
+    if (!this.connected) throw new Error(`MCP ${this.config.name}: Not connected`)
 
     const result = await this.request('tools/call', {
       name: toolName,
@@ -137,7 +137,7 @@ class MCPClientConnection extends EventEmitter {
       .map((c) => `[${c.type}${c.mimeType ? `: ${c.mimeType}` : ''}] ${c.data || ''}`)
 
     const output = [...textParts, ...dataParts].join('\n')
-    return output || '(空返回)'
+    return output || '(empty response)'
   }
 
   /**
@@ -149,7 +149,7 @@ class MCPClientConnection extends EventEmitter {
     // Reject all pending requests
     for (const [, pending] of this.pending) {
       clearTimeout(pending.timer)
-      pending.reject(new Error('连接已关闭'))
+      pending.reject(new Error('Connection closed'))
     }
     this.pending.clear()
 
@@ -194,7 +194,7 @@ class MCPClientConnection extends EventEmitter {
   private connectStdio(timeoutMs: number): Promise<void> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
-        reject(new Error(`MCP ${this.config.name}: 连接超时 (${timeoutMs}ms)`))
+        reject(new Error(`MCP ${this.config.name}: Connection timeout (${timeoutMs}ms)`))
       }, timeoutMs)
 
       try {
@@ -230,7 +230,7 @@ class MCPClientConnection extends EventEmitter {
         // Handle process exit
         child.on('error', (err) => {
           clearTimeout(timer)
-          reject(new Error(`MCP ${this.config.name}: 进程错误 — ${err.message}`))
+          reject(new Error(`MCP ${this.config.name}: Process error — ${err.message}`))
         })
 
         child.on('exit', (code) => {
@@ -238,7 +238,7 @@ class MCPClientConnection extends EventEmitter {
           this.emit('exit', code)
           if (!this.connected) {
             clearTimeout(timer)
-            reject(new Error(`MCP ${this.config.name}: 进程意外退出 (code=${code})`))
+            reject(new Error(`MCP ${this.config.name}: Process exited unexpectedly (code=${code})`))
           }
         })
 
@@ -257,7 +257,7 @@ class MCPClientConnection extends EventEmitter {
   private async connectSSE(timeoutMs: number): Promise<void> {
     // SSE mode: use a POST endpoint for requests and an SSE stream for responses
     // This is a simplified implementation — proper SSE requires persistent connection
-    throw new Error(`MCP ${this.config.name}: SSE 传输暂未实现`)
+    throw new Error(`MCP ${this.config.name}: SSE transport not yet implemented`)
   }
 
   // ── Private: Message Handling ──
@@ -273,7 +273,7 @@ class MCPClientConnection extends EventEmitter {
     this.pending.delete(msg.id)
 
     if (msg.error) {
-      pending.reject(new Error(`MCP 错误 [${msg.error.code}]: ${msg.error.message}`))
+      pending.reject(new Error(`MCP error [${msg.error.code}]: ${msg.error.message}`))
     } else {
       pending.resolve(msg.result)
     }
@@ -294,7 +294,7 @@ class MCPClientConnection extends EventEmitter {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id)
-        reject(new Error(`MCP ${this.config.name}: 请求超时 — ${method}`))
+        reject(new Error(`MCP ${this.config.name}: Request timeout — ${method}`))
       }, 15_000)
 
       this.pending.set(id, { resolve, reject, timer })
@@ -371,7 +371,7 @@ export class MCPManager {
         })
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
-        console.error(`[MCP] 连接失败: ${service.name} — ${message}`)
+        console.error(`[MCP] Connection failed: ${service.name} — ${message}`)
         // Close failed connection
         await connection.close().catch(() => {})
       }
@@ -386,7 +386,7 @@ export class MCPManager {
   async callTool(registeredName: string, args: Record<string, unknown>): Promise<unknown> {
     const entry = this.toolRegistry.get(registeredName)
     if (!entry) {
-      throw new Error(`未知的 MCP 工具: ${registeredName}`)
+      throw new Error(`Unknown MCP tool: ${registeredName}`)
     }
     return entry.connection.callTool(entry.originalName, args)
   }

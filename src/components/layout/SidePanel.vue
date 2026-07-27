@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ChatLineSquare, Cpu, Expand, Fold, FolderOpened, Grid, HomeFilled, Tools } from '@element-plus/icons-vue'
-import { type Component, ref } from 'vue'
+import { type Component, computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import IconMcp from '@/components/icons/IconMcp.vue'
 import IconSkills from '@/components/icons/IconSkills.vue'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 const collapsed = ref(false)
 const panelWidth = ref(200)
 const isResizing = ref(false)
@@ -55,18 +57,18 @@ interface NavItem {
   icon: Component | string
 }
 
-const coreItems: NavItem[] = [
-  { label: '首页', path: '/', icon: HomeFilled },
-  { label: '对话', path: '/chat', icon: ChatLineSquare },
-  { label: '文件', path: '/files', icon: FolderOpened },
-]
+const coreItems = computed<NavItem[]>(() => [
+  { label: t('nav.home'), path: '/', icon: HomeFilled },
+  { label: t('nav.chat'), path: '/chat', icon: ChatLineSquare },
+  { label: t('nav.files'), path: '/files', icon: FolderOpened },
+])
 
-const configItems: NavItem[] = [
-  { label: '通用', path: '/settings/general', icon: Tools },
-  { label: '模型', path: '/settings/models', icon: Cpu },
-  { label: 'Skills', path: '/settings/skills', icon: IconSkills },
-  { label: 'MCP', path: '/settings/mcp', icon: IconMcp },
-]
+const configItems = computed<NavItem[]>(() => [
+  { label: t('nav.settings'), path: '/settings/general', icon: Tools },
+  { label: t('nav.models'), path: '/settings/models', icon: Cpu },
+  { label: t('nav.skills'), path: '/settings/skills', icon: IconSkills },
+  { label: t('nav.mcp'), path: '/settings/mcp', icon: IconMcp },
+])
 </script>
 
 <template>
@@ -76,19 +78,19 @@ const configItems: NavItem[] = [
     :style="{ width: collapsed ? '40px' : panelWidth + 'px' }"
   >
     <div class="side-panel__header">
-      <span v-if="!collapsed" class="side-panel__label">导航</span>
+      <span v-if="!collapsed" class="side-panel__label">{{ t('nav.header') }}</span>
       <el-button
         class="side-panel__toggle"
         :icon="collapsed ? Expand : Fold"
         circle
         text
         size="small"
-        :title="collapsed ? '展开' : '折叠'"
+        :title="collapsed ? t('chat.sidebarExpand') : t('chat.sidebarCollapse')"
         @click="toggle"
       />
     </div>
     <nav class="side-panel__nav" v-show="!collapsed">
-      <div class="side-panel__group-label">核心</div>
+      <div class="side-panel__group-label">{{ t('nav.groupCore') }}</div>
       <div class="side-panel__group">
         <button
           v-for="item in coreItems"
@@ -104,7 +106,7 @@ const configItems: NavItem[] = [
 
       <div class="side-panel__sep"></div>
 
-      <div class="side-panel__group-label">配置</div>
+      <div class="side-panel__group-label">{{ t('nav.groupConfig') }}</div>
       <div class="side-panel__group">
         <button
           v-for="item in configItems"
@@ -120,11 +122,11 @@ const configItems: NavItem[] = [
 
       <div class="side-panel__sep"></div>
 
-      <div class="side-panel__group-label">扩展</div>
+      <div class="side-panel__group-label">{{ t('nav.groupExt') }}</div>
       <div class="side-panel__group">
         <div class="side-panel__item side-panel__item--disabled">
           <el-icon class="side-panel__item-icon"><Grid /></el-icon>
-          <span>插件</span>
+          <span>{{ t('nav.plugins') }}</span>
         </div>
       </div>
     </nav>

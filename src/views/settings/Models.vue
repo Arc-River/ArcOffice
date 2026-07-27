@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { Aim, Check, Delete, Edit } from '@element-plus/icons-vue'
 import { onMounted, ref, toRaw } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useCrudList } from '@/composables/useCrudList'
 import type { AiModel } from '@/types/ai'
 import { getElectronAPI } from '@/utils/ipc'
 
 const api = getElectronAPI()
+const { t } = useI18n()
 
 const activeModelId = ref('')
 const testingId = ref<string | null>(null)
@@ -31,7 +33,7 @@ const crud = useCrudList<AiModel>({
     maxTokens: 1000000,
   }),
   getName: (m) => m.name,
-  entityName: '模型',
+  entityName: t('settings.models.title'),
 })
 
 async function openNewForm() {
@@ -88,38 +90,38 @@ async function testModel(model: AiModel) {
 <template>
   <div class="settings-page">
     <div class="settings-page__header">
-      <h2 class="settings-page__title">模型配置</h2>
-      <el-button type="primary" size="small" @click="openNewForm">添加模型</el-button>
+      <h2 class="settings-page__title">{{ t('settings.models.title') }}</h2>
+      <el-button type="primary" size="small" @click="openNewForm">{{ t('settings.models.add') }}</el-button>
     </div>
-    <p class="settings-page__desc">配置 AI 模型后可在对话页面使用</p>
+    <p class="settings-page__desc">{{ t('settings.models.desc') }}</p>
 
     <!-- Add/Edit Form -->
     <div v-if="crud.showDialog.value" class="settings-page__form">
       <h3 class="settings-page__form-title">
-        {{ crud.editingId.value ? '编辑模型' : '添加模型' }}
+        {{ crud.editingId.value ? t('settings.models.edit') : t('settings.models.addNew') }}
       </h3>
       <el-form label-position="top" size="small">
-        <el-form-item label="名称">
-          <el-input v-model="crud.form.value.name" placeholder="例如: Claude Opus 4.8" />
+        <el-form-item :label="t('settings.models.name')">
+          <el-input v-model="crud.form.value.name" :placeholder="t('settings.models.namePlaceholder')" />
         </el-form-item>
-        <el-form-item label="提供商">
+        <el-form-item :label="t('settings.models.provider')">
           <el-select v-model="crud.form.value.provider" style="width: 100%">
             <el-option value="anthropic" label="Anthropic" />
-            <el-option value="openai-compatible" label="OpenAI 兼容" />
+            <el-option value="openai-compatible" :label="t('settings.models.providerOpenAI')" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Model ID">
-          <el-input v-model="crud.form.value.modelId" placeholder="例如: claude-opus-4-8-20250514" />
+        <el-form-item :label="t('settings.models.modelId')">
+          <el-input v-model="crud.form.value.modelId" :placeholder="t('settings.models.modelIdPlaceholder')" />
         </el-form-item>
         <el-form-item label="API Key">
           <el-input v-model="crud.form.value.apiKey" type="password" show-password placeholder="sk-ant-***" />
         </el-form-item>
         <el-collapse v-model="advancedOpen">
-          <el-collapse-item title="高级选项" name="advanced">
-            <el-form-item label="Base URL (自定义端点)">
-              <el-input v-model="crud.form.value.baseUrl" placeholder="https://api.anthropic.com (留空使用默认)" />
+          <el-collapse-item :title="t('settings.models.advanced')" name="advanced">
+            <el-form-item :label="t('settings.models.baseUrl')">
+              <el-input v-model="crud.form.value.baseUrl" :placeholder="t('settings.models.baseUrlPlaceholder')" />
             </el-form-item>
-            <el-form-item label="温度 (Temperature)">
+            <el-form-item :label="t('settings.models.temperature')">
               <el-slider v-model="crud.form.value.temperature" :min="0" :max="2" :step="0.1" />
             </el-form-item>
             <el-form-item label="Max Tokens">
@@ -128,9 +130,9 @@ async function testModel(model: AiModel) {
           </el-collapse-item>
         </el-collapse>
         <div class="settings-page__form-actions">
-          <el-button @click="crud.cancelForm()">取消</el-button>
+          <el-button @click="crud.cancelForm()">{{ t('settings.models.cancel') }}</el-button>
           <el-button type="primary" @click="saveModel" :disabled="!crud.form.value.name || !crud.form.value.modelId || !crud.form.value.apiKey">
-            保存
+            {{ t('settings.models.save') }}
           </el-button>
         </div>
       </el-form>
@@ -138,8 +140,8 @@ async function testModel(model: AiModel) {
 
     <!-- Model List -->
     <div v-if="crud.items.value.length === 0 && !crud.showDialog.value" class="settings-page__empty">
-      <p class="settings-page__empty-text">暂无模型</p>
-      <p class="settings-page__empty-hint">点击"添加模型"开始配置</p>
+      <p class="settings-page__empty-text">{{ t('settings.models.empty') }}</p>
+      <p class="settings-page__empty-hint">{{ t('settings.models.emptyHint') }}</p>
     </div>
     <div v-else class="settings-page__section">
       <div v-for="m in crud.items.value" :key="m.id" class="settings-page__model-card">
@@ -158,11 +160,11 @@ async function testModel(model: AiModel) {
           </div>
         </div>
         <div class="settings-page__model-actions">
-          <el-tag v-if="m.id === activeModelId" type="success" size="small">已激活</el-tag>
+          <el-tag v-if="m.id === activeModelId" type="success" size="small">{{ t('settings.models.activated') }}</el-tag>
           <template v-else>
-            <el-button text size="small" :icon="Check" @click="setActiveModel(m.id)">激活</el-button>
+            <el-button text size="small" :icon="Check" @click="setActiveModel(m.id)">{{ t('settings.models.activate') }}</el-button>
           </template>
-          <el-button text size="small" :icon="Edit" @click="openEditForm(m)">编辑</el-button>
+          <el-button text size="small" :icon="Edit" @click="openEditForm(m)">{{ t('settings.models.edit') }}</el-button>
           <el-button
             text
             size="small"
@@ -171,16 +173,16 @@ async function testModel(model: AiModel) {
             :loading="testingId === m.id"
             @click="testModel(m)"
           >
-            {{ testingId === m.id ? '测试中…' : '测试' }}
+            {{ testingId === m.id ? t('settings.models.testing') : t('settings.models.test') }}
           </el-button>
           <el-popconfirm
-            title="确定删除模型？"
-            confirm-button-text="删除"
-            cancel-button-text="取消"
+            :title="t('settings.models.deleteConfirm')"
+            :confirm-button-text="t('settings.models.delete')"
+            :cancel-button-text="t('settings.models.cancel')"
             @confirm="deleteModel(m.id)"
           >
             <template #reference>
-              <el-button text size="small" :icon="Delete" type="danger">删除</el-button>
+              <el-button text size="small" :icon="Delete" type="danger">{{ t('settings.models.delete') }}</el-button>
             </template>
           </el-popconfirm>
         </div>

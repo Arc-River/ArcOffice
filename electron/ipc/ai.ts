@@ -89,58 +89,58 @@ function isPathAllowed(targetPath: string): boolean {
 const FILE_TOOLS = [
   {
     name: 'read_file',
-    description: '读取指定文件的文本内容（UTF-8）。用于查看源代码、配置、JSON、Markdown 等纯文本文件。',
+    description: 'Read text content from a file (UTF-8). Use for viewing source code, config, JSON, Markdown, and other plain text files.',
     input_schema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: '文件的绝对路径' },
+        path: { type: 'string', description: 'Absolute path to the file' },
       },
       required: ['path'],
     },
   },
   {
     name: 'write_file',
-    description: '将文本内容写入指定文件（覆盖写入）。如果文件不存在则创建新文件。用于创建新文件或完全重写现有文件。注意：只能写入纯文本格式，不能生成 .docx/.xlsx/.pptx 等二进制格式。',
+    description: 'Write text content to a file (overwrite). Creates the file if it does not exist. Use for creating new files or completely rewriting existing files. Note: only supports plain text, cannot generate binary formats like .docx/.xlsx/.pptx.',
     input_schema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: '文件的绝对路径' },
-        content: { type: 'string', description: '要写入的完整文件内容' },
+        path: { type: 'string', description: 'Absolute path to the file' },
+        content: { type: 'string', description: 'Complete file content to write' },
       },
       required: ['path', 'content'],
     },
   },
   {
     name: 'edit_file',
-    description: '对文本文件进行精确的查找替换编辑。查找的 old_string 必须与文件中现有内容完全匹配（包括缩进和空格），只替换第一个匹配项。用于对文本文件进行局部修改。不支持二进制格式文件。',
+    description: 'Perform precise search-and-replace on text files. old_string must exactly match the existing content (including indentation and whitespace). Only the first match is replaced. Use for partial text modifications. Does not support binary formats.',
     input_schema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: '文件的绝对路径' },
-        old_string: { type: 'string', description: '被替换的原文（必须与文件中内容完全一致）' },
-        new_string: { type: 'string', description: '替换后的新文本' },
+        path: { type: 'string', description: 'Absolute path to the file' },
+        old_string: { type: 'string', description: 'Exact text to replace (must match existing content exactly)' },
+        new_string: { type: 'string', description: 'Replacement text' },
       },
       required: ['path', 'old_string', 'new_string'],
     },
   },
   {
     name: 'list_directory',
-    description: '列出指定目录下的所有文件和文件夹。用于浏览项目结构、查找文件。',
+    description: 'List all files and directories in a specified path. Use for browsing project structure and finding files.',
     input_schema: {
       type: 'object',
       properties: {
-        path: { type: 'string', description: '目录的绝对路径' },
+        path: { type: 'string', description: 'Absolute path to the directory' },
       },
       required: ['path'],
     },
   },
   {
     name: 'run_command',
-    description: '在用户电脑上执行 shell 命令（非交互式）。用于运行构建命令、安装依赖、启动服务、执行脚本、查看文件等。命令在工作目录下执行。注意：不能运行交互式命令（如 vim、top）。',
+    description: 'Execute a shell command on the user's machine (non-interactive). Use for running build commands, installing dependencies, starting services, executing scripts, and viewing files. Commands run in the working directory. Note: interactive commands (vim, top, etc.) are not supported.',
     input_schema: {
       type: 'object',
       properties: {
-        command: { type: 'string', description: '要执行的 shell 命令' },
+        command: { type: 'string', description: 'Shell command to execute' },
       },
       required: ['command'],
     },
@@ -164,7 +164,7 @@ async function executeTool(name: string, input: Record<string, unknown>): Promis
   const targetPath = path.resolve(String(input.path))
 
   if (!isPathAllowed(targetPath)) {
-    throw new Error(`权限不足：不允许访问路径 ${targetPath}`)
+    throw new Error(`Permission denied: path ${targetPath}`)
   }
 
   switch (name) {
@@ -193,10 +193,10 @@ async function executeTool(name: string, input: Record<string, unknown>): Promis
         const searchLines = oldStr.split('\n')
         const firstLine = searchLines[0].trim()
         const matchLine = lines.findIndex((l) => l.trim().includes(firstLine))
-        let hint = `在文件中未找到精确匹配的文本。`
+        let hint = `Exact match not found in the file.`
         if (matchLine >= 0) {
           const context = lines.slice(Math.max(0, matchLine - 1), matchLine + 2).join('\n')
-          hint += ` 在第 ${matchLine + 1} 行附近找到相似内容，但缩进或格式不完全一致。附近内容：\n${context}`
+          hint += ` Found similar content near line ${matchLine + 1}, but indentation or formatting does not match exactly. Nearby content:\n${context}`
         }
         throw new Error(hint)
       }
@@ -221,7 +221,7 @@ async function executeTool(name: string, input: Record<string, unknown>): Promis
 
 
     default:
-      throw new Error(`未知工具: ${name}`)
+      throw new Error(`Unknown tool: ${name}`)
   }
 }
 
@@ -233,7 +233,7 @@ async function executeWebSearch(input: Record<string, unknown>): Promise<unknown
   const query = String(input.query)
   const maxResults = Number(input.max_results) || 5
   const wsConfig = getWebSearchConfig()
-  if (!wsConfig?.api_key) throw new Error('Web search 未配置，请在设置中配置 API Key')
+  if (!wsConfig?.api_key) throw new Error('Web search is not configured. Please set up an API Key in Settings.')
   const apiKey = wsConfig.api_key
 
   const resp = await fetch('https://api.tavily.com/search', {
@@ -267,7 +267,7 @@ async function executeRunCommand(input: Record<string, unknown>): Promise<unknow
   const cwd = cachedWorkingDir || app.getPath('documents')
 
   if (!isPathAllowed(cwd)) {
-    throw new Error(`权限不足：工作目录 ${cwd} 不在允许范围内`)
+    throw new Error(`Permission denied: working directory ${cwd} is not allowed`)
   }
 
   const { stdout, stderr } = await exec(command, {
@@ -319,8 +319,8 @@ async function buildSystemPrompt(capabilities?: ChatCapabilities): Promise<strin
         )
         skillsSection = [
           '',
-          '# 🧰 已激活的技能指令',
-          '系统为你开启了以下技能，请在使用相关功能时严格遵循对应的操作指南：',
+          '# 🧰 Active Skill Instructions',
+          'The following skills are activated. Please strictly follow their guidelines when performing related tasks:',
           '',
           parts.join('\n\n---\n\n'),
           '',
@@ -343,17 +343,17 @@ async function buildSystemPrompt(capabilities?: ChatCapabilities): Promise<strin
       if (activeServices.length > 0) {
         const details = activeServices.map((s) => {
           if (s.type === 'stdio') {
-            return `  - **${s.name}** (本地): \`${s.command} ${s.args.join(' ')}\``
+            return `  - **${s.name}** (local): \`${s.command} ${s.args.join(' ')}\``
           }
-          return `  - **${s.name}** (远程): ${s.url}`
+          return `  - **${s.name}** (remote): ${s.url}`
         })
 
         mcpSection = [
           '',
-          '# 🔌 外部工具（MCP 服务）',
-          '以下 MCP 服务已激活，它们的工具已自动注册到你的可用工具列表中，你可以直接调用它们（使用 `mcp__服务名__工具名` 命名格式）。每个工具在调用时会自动连接并执行。',
+          '# 🔌 External Tools (MCP Services)',
+          'The following MCP services are active. Their tools are registered in your available tool list. Use `mcp__serviceName__toolName` to call them. Each tool connects and executes automatically.',
           '',
-          '已激活的服务：',
+          'Active services:',
           ...details,
           '',
         ].join('\n')
@@ -373,15 +373,15 @@ async function buildSystemPrompt(capabilities?: ChatCapabilities): Promise<strin
     if (hasWebSearchKey) {
       webSearchSection = [
         '',
-        '# 🌐 Web 搜索',
-        'Web 搜索功能已启用。你可以通过 web_search 工具搜索互联网获取最新信息。',
+        '# 🌐 Web Search',
+        'Web search is enabled. Use the web_search tool to search the internet for the latest information.',
         '',
       ].join('\n')
     } else {
       webSearchSection = [
         '',
-        '# 🌐 Web 搜索',
-        '⚠️ Web 搜索已开启但未配置 API Key，请在设置中配置 Tavily API Key 以启用搜索功能。',
+        '# 🌐 Web Search',
+        'Web search is enabled but no API Key is configured. Set up a Tavily API Key in Settings to enable search functionality.',
         '',
       ].join('\n')
     }
@@ -402,12 +402,12 @@ async function buildDynamicTools(capabilities?: ChatCapabilities): Promise<typeo
     if (config?.api_key) {
       extraTools.push({
         name: 'web_search',
-        description: '搜索互联网获取最新信息。当你需要了解当前事件、查找最新数据、或获取对话历史之外的信息时使用。返回搜索结果列表，包含标题、链接和摘要。',
+        description: 'Search the internet for the latest information. Use when you need current events, recent data, or information outside the conversation history. Returns search results with titles, links, and summaries.',
         input_schema: {
           type: 'object',
           properties: {
-            query: { type: 'string', description: '搜索查询关键词' },
-            max_results: { type: 'number', description: '最大返回结果数（默认 5）' },
+            query: { type: 'string', description: 'Search query keywords' },
+            max_results: { type: 'number', description: 'Maximum number of results (default 5)' },
           },
           required: ['query'],
         },
@@ -550,60 +550,60 @@ function sendError(
 
 // ── Anthropic Streaming with Tool Use ──
 
-const SYSTEM_PROMPT_BASE = `你是 ArcOffice 的 AI 助手，运行在用户的电脑上。你可以直接读写用户文件系统中的文件，也可以与用户对话。
+const SYSTEM_PROMPT_BASE = `You are the ArcOffice AI assistant, running on the user's computer. You can read and write files directly on the user's filesystem and converse with the user.
 
-# 🛠 可用工具
+# Available Tools
 
-- read_file      读取文件文本内容
-- write_file     写入/覆盖文件（创建新文件或完全重写）
-- edit_file      查找替换编辑（局部修改）
-- list_directory 浏览目录结构
-- run_command    执行 shell 命令（npm install、git status、ls 等，超时 30 秒）
+- read_file      Read file content
+- write_file     Write/overwrite file (create or replace)
+- edit_file      Search-and-replace edit (partial modification)
+- list_directory Browse directory structure
+- run_command    Execute shell command (npm install, git status, ls, etc., 30s timeout)
 
-# 📋 工作流程
+# Workflow
 
-当用户提出需求时：
-1. 先理解用户意图，判断是否需要操作文件
-2. 如需操作文件：先用 list_directory 或 read_file 了解项目结构
-3. 然后用 write_file 或 edit_file 进行操作
-4. 修改后展示变更摘要，说明做了什么
+When the user makes a request:
+1. First understand their intent and determine if file operations are needed
+2. Use list_directory or read_file to understand the structure first
+3. Use write_file or edit_file to make changes
+4. Summarize what was changed
 
-⚠️ 注意事项：
-- edit_file 的 old_string 必须与文件中内容完全一致（包括缩进空格）
-- 如果编辑失败，先 read_file 确认当前内容再尝试
-- 所有文件路径使用绝对路径
-- run_command 不能运行交互式命令（vim、top 等）
+⚠️ Important Notes:
+- edit_file old_string must exactly match the file content (including indentation and whitespace)
+- If editing fails, use read_file first to confirm current content
+- Always use absolute paths for file operations
+- run_command cannot run interactive commands (vim, top, etc.)
 
-# 💬 回复结构
+# Response Format
 
-1. **思考** — 在 <thinking> 标签中先推理，再给出回答：
+1. **Thinking** — Reason inside <thinking> tags before answering:
 
      <thinking>
-     分析用户需求，检索相关文件，推理验证方案。
+     Analyze user needs, retrieve relevant files, validate approach.
      </thinking>
 
-   这是最终的回答内容。
+   This is the final answer.
 
-2. **语气** — 友好、专业、简洁。技术问题给具体方案，简单问题直接回答。
+2. **Tone** — Friendly, professional, concise. Give concrete solutions for technical issues, direct answers for simple questions.
 
-3. **格式** — 需要时使用 Markdown（见下方速查），不要为用而用。
+3. **Format** — Use Markdown when appropriate (see reference below).
 
-# 📝 Markdown 速查
+# Markdown Reference
 
-基础： #标题 **加粗** *斜体* ~~删除线~~ ==高亮== ++插入++ \`code\`
-列表： -无序 1.有序 -[ ]任务  >引用  :smile:
-代码： \`\`\`语言名  代码块（自动高亮：ts/py/go/rust/css/bash/json/yaml 等）
-Diff： \`\`\`diff  -删除行 +新增行  上下文
-表格： |列1|列2|  |---|---|   内容
-图表： \`\`\`mermaid  流程图/时序图/甘特图/思维导图/ER图/类图/状态图/C4图 等
-      \`\`\`d2       架构图、系统拓扑
-      \`\`\`infographic  柱状图/折线图/饼图
-数学： $E=mc^2$（行内） $$公式$$（块级）
-容器： ::: tip/warning/danger  内容  :::
-链接： [文本](URL)  ![图片](URL)
-分割： ---
+Basics: # H1 **bold** *italic* ~~strikethrough~~ ==highlight== ++insert++ `code`
+Lists: - ul 1. ol -[ ] task > blockquote :smile:
+Code: ```lang  fenced code blocks (auto-highlight: ts/py/go/rust/css/bash/json/yaml etc.)
+Diff: ```diff  -deleted +added  context
+Tables: |col1|col2|  |---|---|  content
+Diagrams: ```mermaid  flowchart/sequence/gantt/mindmap/ER/class/state/C4
+      ```d2       system architecture, topology
+      ```infographic  bar/line/pie charts
+Math: $E=mc^2$ (inline) $$formula$$ (block)
+Containers: ::: tip/warning/danger  content  :::
+Links: [text](URL)  ![image](URL)
+Divider: ---
 
-所有代码块和图表由前端自动渲染。长回答用标题和列表组织。`
+All code blocks and diagrams are rendered automatically. Use headings and lists for long answers.`
 
 interface ToolUse {
   name: string
@@ -738,7 +738,7 @@ async function streamAnthropic(
     }
 
     // Exceeded maximum tool rounds
-    sendChunk(event, id, '\n\n[已达到最大操作次数，如需继续请重新提问]')
+    sendChunk(event, id, '\n\n[Maximum operations reached. Please ask a new question to continue.]')
     sendDone(event, id)
   } finally {
     // Clean up MCP connections
@@ -893,7 +893,7 @@ async function streamOpenAI(
       }
     }
 
-    sendChunk(event, id, '\n\n[已达到最大操作次数，如需继续请重新提问]')
+    sendChunk(event, id, '\n\n[Maximum operations reached. Please ask a new question to continue.]')
     sendDone(event, id)
   } finally {
     // Clean up MCP connections
@@ -928,7 +928,7 @@ export async function chatStream(
       } else if (model.provider === 'openai-compatible') {
         await streamOpenAI(_event, id, model, messages, capabilities)
       } else {
-        throw new Error(`不支持的提供商: ${model.provider}`)
+        throw new Error(`Unsupported provider: ${model.provider}`)
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
@@ -963,7 +963,7 @@ export async function testConnection(
         max_tokens: 10,
         messages: [{ role: 'user', content: 'ping' }],
       })
-      return { success: true, message: '连接成功' }
+      return { success: true, message: 'Connection successful' }
     }
 
     if (model.provider === 'openai-compatible') {
@@ -985,10 +985,10 @@ export async function testConnection(
         const body = await response.text().catch(() => '')
         return { success: false, message: `HTTP ${response.status}: ${body}` }
       }
-      return { success: true, message: '连接成功' }
+      return { success: true, message: 'Connection successful' }
     }
 
-    return { success: false, message: `不支持的提供商: ${model.provider}` }
+    return { success: false, message: `Unsupported provider: ${model.provider}` }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     return { success: false, message }

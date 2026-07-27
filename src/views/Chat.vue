@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowRight, Operation } from '@element-plus/icons-vue'
 import { nextTick, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useAiChat } from '@/composables/useAiChat'
 import type { FileAttachment, McpService, SkillItem } from '@/types/ai'
@@ -24,6 +25,7 @@ const {
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const attachments = ref<FileAttachment[]>([])
 const sidebarVisible = ref(true)
 const isAttaching = ref(false)
@@ -95,12 +97,24 @@ onMounted(async () => {
 
   // 从文件页面通过 ?file=/path 跳转过来时，自动发送文件处理请求
   const filePath = route.query.file as string | undefined
-  if (filePath) {
+  if (filePath && api) {
     router.replace({ query: {} })
     const fileName = filePath.split(/[/\\]/).pop() || filePath
-    currentFile.value = fileName
+    let content = ''
+    try {
+      content = await api.readFileText(filePath)
+    } catch {
+      // binary or unreadable file
+    }
     nextTick(() => {
-      sendMessage(`「${fileName}」，路径：${filePath}`)
+      sendMessage(t('chat.sendWithFile', { name: fileName }), undefined, [
+        {
+          name: fileName,
+          path: filePath,
+          content,
+          size: content.length,
+        },
+      ])
     })
   }
 })
@@ -192,7 +206,7 @@ function handleNewSession() {
           text
           size="small"
           class="chat__sidebar-toggle"
-          :title="sidebarVisible ? '收起侧栏' : '展开侧栏'"
+          :title="sidebarVisible ? t('chat.sidebarCollapse') : t('chat.sidebarExpand')"
           @click="sidebarVisible = !sidebarVisible"
         />
       </div>
@@ -202,9 +216,9 @@ function handleNewSession() {
             <div class="chat__empty-icon">
               <img src="/logo.svg" alt="ArcOffice" width="48" height="48" />
             </div>
-            <p class="chat__empty-text">开始与 AI 对话</p>
+            <p class="chat__empty-text">{{ t('chat.emptyTitle') }}</p>
             <p class="chat__empty-hint">
-              {{ isStreaming ? 'AI 正在回复…' : '输入内容开始对话，或附加文件进行分析' }}
+              {{ isStreaming ? t('chat.streaming') : t('chat.emptyHint') }}
             </p>
           </div>
         </template>
@@ -223,13 +237,13 @@ function handleNewSession() {
             round
             size="small"
             @click="scrollToBottom(); autoScroll = true"
-            title="回到最新回复"
+            :title="t('chat.scrollBottom')"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9" />
             </svg>
-            <span style="margin-left:4px" v-if="isStreaming">AI 正在回复中</span>
-            <span style="margin-left:4px" v-else>回到最新消息</span>
+            <span style="margin-left:4px" v-if="isStreaming">{{ t('chat.streaming') }}</span>
+            <span style="margin-left:4px" v-else>{{ t('chat.backToLatest') }}</span>
           </el-button>
         </Transition>
       </div>

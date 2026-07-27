@@ -91,7 +91,13 @@ const themeLabel = computed(() => {
   }
 
   &__theme-btn {
-    // el-button text handles styling; minimal gap for icon+label
+    border: none !important;
+
+    &:hover,
+    &:focus,
+    &:active {
+      border: none !important;
+    }
   }
 }
 </style>

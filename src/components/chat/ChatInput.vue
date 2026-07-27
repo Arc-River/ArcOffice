@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import IconMcp from '@/components/icons/IconMcp.vue'
 import IconSkills from '@/components/icons/IconSkills.vue'
 import type { FileAttachment, McpService, SkillItem } from '@/types/ai'
@@ -25,6 +26,8 @@ const emit = defineEmits<{
   toggleMcp: [serviceId: string]
   toggleWebSearch: [enabled: boolean]
 }>()
+
+const { t } = useI18n()
 
 const text = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -128,7 +131,7 @@ function isMcpActive(s: McpService): boolean {
 function handleToggleWebSearch() {
   const next = !props.webSearch
   if (next && !props.webSearchConfigured) {
-    ElMessage.warning('Web Search 未配置 API Key，请在 设置 → 通用 → Web Search 中配置')
+    ElMessage.warning(t('chatInput.webSearchNotConfigured'))
   }
   emit('toggleWebSearch', next)
 }
@@ -149,7 +152,7 @@ function handleToggleWebSearch() {
         </svg>
         <span class="chat-input__chip-name">{{ f.name }}</span>
         <span class="chat-input__chip-size" v-if="f.size > 0">({{ (f.size / 1024).toFixed(1) }}KB)</span>
-        <button class="chat-input__chip-remove" @click="emit('removeAttachment', i)" title="移除文件">&times;</button>
+        <button class="chat-input__chip-remove" @click="emit('removeAttachment', i)" :title="t('chatInput.removeFile')">&times;</button>
       </span>
     </div>
 
@@ -159,11 +162,11 @@ function handleToggleWebSearch() {
         ref="inputRef"
         class="chat-input__field"
         v-model="text"
-        placeholder="Ask anything, or attach files for AI to analyze..."
+        :placeholder="t('chatInput.placeholder')"
         @keydown="handleKeydown"
         :disabled="disabled"
       />
-      <button class="chat-input__btn" title="展开工具" @click="toggleTools" :class="{ 'chat-input__btn--active': showTools }">
+      <button class="chat-input__btn" :title="t('chatInput.expandTools')" @click="toggleTools" :class="{ 'chat-input__btn--active': showTools }">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <circle cx="12" cy="12" r="3" />
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
@@ -199,11 +202,11 @@ function handleToggleWebSearch() {
 
     <!-- Tool buttons row -->
     <div class="chat-input__tools-row" v-if="showTools">
-      <button class="chat-input__tool-btn" title="附加文件" @click="emit('attach')">
+      <button class="chat-input__tool-btn" :title="t('chatInput.attachFile')" @click="emit('attach')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
           <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.31 2.69 6 6 6s6-2.69 6-6V6h-2.5z" />
         </svg>
-        <span>Add files</span>
+        <span>{{ t('chatInput.addFiles') }}</span>
       </button>
 
       <template v-for="g in capabilityGroups" :key="g.key">
@@ -216,7 +219,7 @@ function handleToggleWebSearch() {
           <template #reference>
             <button
               class="chat-input__tool-btn"
-              :title="g.title + '（点击展开/收起）'"
+              :title="g.title + ' (' + t('chatInput.clickToToggle') + ')'"
               v-if="g.items.length > 0"
             >
               <IconSkills class="chat-input__tool-svg" v-if="g.key === 'skills'" />
@@ -253,8 +256,8 @@ function handleToggleWebSearch() {
           <circle cx="12" cy="12" r="4" />
           <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
         </svg>
-        <span>Web search</span>
-        <span class="chat-input__toggle-label" :class="{ 'chat-input__toggle-label--on': webSearch }" @click.prevent="handleToggleWebSearch">{{ webSearch ? 'Auto' : 'Off' }}</span>
+        <span>{{ t('chatInput.webSearch') }}</span>
+        <span class="chat-input__toggle-label" :class="{ 'chat-input__toggle-label--on': webSearch }" @click.prevent="handleToggleWebSearch">{{ webSearch ? t('chatInput.webSearchAuto') : t('chatInput.webSearchOff') }}</span>
       </label>
     </div>
 

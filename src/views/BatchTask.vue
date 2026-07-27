@@ -1,22 +1,26 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { TaskRecord } from '@/types/models'
 import { getElectronAPI } from '@/utils/ipc'
 
 interface TaskView extends TaskRecord {
-  _statusLabel: string
   _statusClass: string
 }
 
+const { t } = useI18n()
 const api = getElectronAPI()
 const tasks = ref<TaskView[]>([])
 
-const STATUS_MAP: Record<string, { label: string; cls: string }> = {
-  pending: { label: '待处理', cls: 'tag-pending' },
-  processing: { label: '处理中', cls: 'tag-processing' },
-  completed: { label: '已完成', cls: 'tag-success' },
-  warning: { label: '部分完成', cls: 'tag-warning' },
-  failed: { label: '失败', cls: 'tag-error' },
+function getStatusConfig(status: string): { label: string; cls: string } {
+  const map: Record<string, { label: string; cls: string }> = {
+    pending: { label: t('batch.pending'), cls: 'tag-pending' },
+    processing: { label: t('batch.processing'), cls: 'tag-processing' },
+    completed: { label: t('batch.completed'), cls: 'tag-success' },
+    warning: { label: t('batch.partial'), cls: 'tag-warning' },
+    failed: { label: t('batch.failed'), cls: 'tag-error' },
+  }
+  return map[status] || { label: status, cls: 'tag-pending' }
 }
 
 onMounted(async () => {
@@ -25,8 +29,7 @@ onMounted(async () => {
     const records = await api.getTasks()
     tasks.value = records.map((t) => ({
       ...t,
-      _statusLabel: STATUS_MAP[t.status]?.label || t.status,
-      _statusClass: STATUS_MAP[t.status]?.cls || 'tag-pending',
+      _statusClass: getStatusConfig(t.status).cls,
     }))
   } catch {
     // DB not available
@@ -37,12 +40,12 @@ onMounted(async () => {
 <template>
   <div class="batch-task">
     <div class="batch-task__toolbar">
-      <h2 class="batch-task__title">批量任务</h2>
+      <h2 class="batch-task__title">{{ t('batch.title') }}</h2>
     </div>
 
     <div v-if="tasks.length === 0" class="batch-task__empty">
-      <p class="batch-task__text">暂无批量任务</p>
-      <p class="batch-task__hint">批量处理多个文件时，任务将显示在这里</p>
+      <p class="batch-task__text">{{ t('batch.empty') }}</p>
+      <p class="batch-task__hint">{{ t('batch.emptyHint') }}</p>
     </div>
 
     <div v-else class="batch-task__list">
@@ -51,7 +54,7 @@ onMounted(async () => {
           <div class="task-card__info">
             <span class="task-card__type">{{ task.type }}</span>
             <span class="task-card__status" :class="task._statusClass">
-              {{ task._statusLabel }}
+              {{ getStatusConfig(task.status).label }}
             </span>
           </div>
         </div>

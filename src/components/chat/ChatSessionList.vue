@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ChatDotSquare, Delete, Plus } from '@element-plus/icons-vue'
 import { nextTick, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { ChatSession } from '@/types/ai'
 import { formatRelativeTime } from '@/utils/format'
+
+const { t } = useI18n()
 
 defineProps<{
   sessions: ChatSession[]
@@ -46,14 +49,14 @@ function cancelRename() {
 <template>
   <aside class="session-list">
     <div class="session-list__header">
-      <span class="session-list__label">会话</span>
+      <span class="session-list__label">{{ t('chat.newSession') }}</span>
       <el-button
         class="session-list__new"
         :icon="Plus"
         circle
         text
         size="small"
-        title="新建对话"
+        :title="t('chat.newChat')"
         @click="emit('newSession')"
       />
     </div>
@@ -83,9 +86,9 @@ function cancelRename() {
         />
         <span class="session-list__item-time">{{ formatRelativeTime(s.updated_at) }}</span>
         <el-popconfirm
-          title="确定删除？"
-          confirm-button-text="删除"
-          cancel-button-text="取消"
+          :title="t('common.confirm') + '?'"
+          :confirm-button-text="t('common.delete')"
+          :cancel-button-text="t('common.cancel')"
           @confirm="emit('delete', s.id)"
         >
           <template #reference>
@@ -96,14 +99,14 @@ function cancelRename() {
               text
               size="small"
               type="danger"
-              title="删除会话"
+              :title="t('common.delete') + ' ' + t('chat.newSession')"
               @click.stop
             />
           </template>
         </el-popconfirm>
       </button>
       <div v-if="sessions.length === 0" class="session-list__empty">
-        暂无会话
+        {{ t('chat.emptyTitle') }}
       </div>
     </nav>
   </aside>
@@ -111,7 +114,7 @@ function cancelRename() {
 
 <style lang="scss" scoped>
 .session-list {
-  width: 200px;
+  width: 220px;
   flex-shrink: 0;
   background: var(--arc-bg-page);
   border-right: 1px solid var(--arc-border);

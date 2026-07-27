@@ -42,8 +42,8 @@ export function registerAllHandlers() {
     const result = await dialog.showOpenDialog({
       properties: ['openFile'],
       filters: [
-        { name: '支持的文件', extensions: ['docx', 'xlsx', 'pptx', 'txt', 'md', 'json', 'csv', 'js', 'ts', 'vue', 'css', 'scss', 'html', 'xml', 'yaml', 'yml', 'toml'] },
-        { name: '所有文件', extensions: ['*'] },
+        { name: 'Supported Files', extensions: ['docx', 'xlsx', 'pptx', 'txt', 'md', 'json', 'csv', 'js', 'ts', 'vue', 'css', 'scss', 'html', 'xml', 'yaml', 'yml', 'toml'] },
+        { name: 'All Files', extensions: ['*'] },
       ],
     })
     return result.canceled ? null : result.filePaths[0]
