@@ -11,7 +11,6 @@ asarUnpack:
 files:
   - dist/**/*
   - dist-electron/**/*
-  - "!node_modules/**/*"
 
 mac:
   target: [dmg, zip]
