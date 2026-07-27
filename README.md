@@ -9,7 +9,7 @@
 
 ![ArcOffice Demo](./docs/office-editor-demo.gif)
 
-A cross-platform desktop Office tool built with **Electron + Vue 3**.
+A cross-platform desktop Office agent built with **Electron + Vue 3**.
 Runs locally, privacy-first.
 
 ## Stack
