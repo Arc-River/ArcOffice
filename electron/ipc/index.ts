@@ -1,4 +1,4 @@
-import { dialog, ipcMain } from 'electron'
+import { dialog, ipcMain, type OpenDialogOptions, type SaveDialogOptions } from 'electron'
 import * as io from './io'
 import * as db from './db'
 import * as ai from './ai'
@@ -14,6 +14,18 @@ function registerModule(prefix: string, mod: Record<string, unknown>) {
       ipcMain.handle(`${prefix}:${name}`, handler)
     }
   }
+}
+
+/** Shared helper for open-dialog IPC handlers */
+async function openDialog(options: OpenDialogOptions): Promise<string | null> {
+  const result = await dialog.showOpenDialog(options)
+  return result.canceled ? null : result.filePaths[0]
+}
+
+/** Shared helper for save-dialog IPC handlers */
+async function saveDialog(options: SaveDialogOptions): Promise<string | null> {
+  const result = await dialog.showSaveDialog(options)
+  return result.canceled ? null : result.filePath
 }
 
 export function registerAllHandlers() {
@@ -37,22 +49,44 @@ export function registerAllHandlers() {
   ipcMain.handle('ai:chat', ai.chatStream)
   ipcMain.handle('ai:testConnection', ai.testConnection)
 
-  // File dialog (inline handlers, not in a module)
-  ipcMain.handle('dialog:openFile', async () => {
-    const result = await dialog.showOpenDialog({
+  // File dialogs
+  ipcMain.handle('dialog:openFile', () =>
+    openDialog({
       properties: ['openFile'],
       filters: [
         { name: 'Supported Files', extensions: ['docx', 'xlsx', 'pptx', 'txt', 'md', 'json', 'csv', 'js', 'ts', 'vue', 'css', 'scss', 'html', 'xml', 'yaml', 'yml', 'toml'] },
         { name: 'All Files', extensions: ['*'] },
       ],
-    })
-    return result.canceled ? null : result.filePaths[0]
-  })
+    }),
+  )
 
-  ipcMain.handle('dialog:selectDirectory', async () => {
-    const result = await dialog.showOpenDialog({
-      properties: ['openDirectory'],
-    })
-    return result.canceled ? null : result.filePaths[0]
-  })
+  ipcMain.handle('dialog:selectDirectory', () =>
+    openDialog({ properties: ['openDirectory'] }),
+  )
+
+  ipcMain.handle('dialog:openOfficeFile', () =>
+    openDialog({
+      properties: ['openFile'],
+      filters: [
+        { name: 'Office Documents', extensions: ['docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt', 'odt', 'ods', 'odp', 'csv', 'txt', 'rtf'] },
+        { name: 'Word', extensions: ['docx', 'doc', 'odt', 'rtf'] },
+        { name: 'Excel', extensions: ['xlsx', 'xls', 'ods', 'csv'] },
+        { name: 'PowerPoint', extensions: ['pptx', 'ppt', 'odp'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
+    }),
+  )
+
+  ipcMain.handle('dialog:saveOfficeFile', (_event, defaultName: string) =>
+    saveDialog({
+      defaultPath: defaultName,
+      filters: [
+        { name: 'Office Documents', extensions: ['docx', 'xlsx', 'pptx'] },
+        { name: 'Word', extensions: ['docx'] },
+        { name: 'Excel', extensions: ['xlsx'] },
+        { name: 'PowerPoint', extensions: ['pptx'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
+    }),
+  )
 }

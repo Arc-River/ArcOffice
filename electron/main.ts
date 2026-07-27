@@ -1,3 +1,5 @@
+declare const __ONLYOFFICE_CDN__: string
+
 import { app, BrowserWindow, session } from 'electron'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -45,7 +47,8 @@ function createWindow() {
         responseHeaders: {
           ...details.responseHeaders,
           'Content-Security-Policy': [
-            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'",
+            // OnlyOffice SDK needs: CDN scripts/workers, blob: for wasm, 'unsafe-inline' for styles
+            `default-src 'self'; script-src 'self' 'unsafe-eval' ${__ONLYOFFICE_CDN__} blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ${__ONLYOFFICE_CDN__} blob:; worker-src 'self' blob:`,
           ],
         },
       })

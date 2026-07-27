@@ -7,12 +7,20 @@
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Biome](https://img.shields.io/badge/Biome-2-60A5FA?logo=biome&logoColor=white)](https://biomejs.dev/)
 
+![ArcOffice Demo](./docs/office-editor-demo.gif)
+
 A cross-platform desktop Office tool built with **Electron + Vue 3**.
 Runs locally, privacy-first.
 
 ## Stack
 
-Electron / Vue 3 / TypeScript / Vite 6 / Element Plus / Pinia / sql.js / Biome / @anthropic-ai/sdk
+**Core:** Electron / Vue 3 / TypeScript / Vite 6 / Element Plus / Pinia
+
+**AI:** @anthropic-ai/sdk / MCP (Model Context Protocol) / markstream-vue
+
+**Office:** OnlyOffice Web SDK / exceljs
+
+**Tools:** Biome / sql.js
 
 ## Quick Start
 

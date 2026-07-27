@@ -31,6 +31,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'nav.files' },
   },
   {
+    path: '/office',
+    name: 'office',
+    component: () => import('@/views/OfficeEditorView.vue'),
+    meta: { title: 'nav.office' },
+  },
+  {
     path: '/settings/general',
     name: 'settings-general',
     component: () => import('@/views/settings/General.vue'),

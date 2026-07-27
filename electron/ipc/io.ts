@@ -25,3 +25,25 @@ export async function readFileText(_event: Electron.IpcMainInvokeEvent, filePath
   }
   return await fsp.readFile(filePath, 'utf-8')
 }
+
+// ── Binary file I/O (needed by OnlyOffice) ──
+
+export async function readFileBinary(_event: Electron.IpcMainInvokeEvent, filePath: string) {
+  if (!isPathAllowed(filePath)) {
+    throw new Error(`Permission denied: ${filePath}`)
+  }
+  const buffer = await fsp.readFile(filePath)
+  return { data: [...buffer], path: filePath }
+}
+
+export async function writeFileBinary(
+  _event: Electron.IpcMainInvokeEvent,
+  filePath: string,
+  data: number[],
+) {
+  if (!isPathAllowed(filePath)) {
+    throw new Error(`Permission denied: ${filePath}`)
+  }
+  await fsp.writeFile(filePath, Buffer.from(data))
+  return { path: filePath }
+}

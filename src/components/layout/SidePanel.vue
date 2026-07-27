@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ChatLineSquare, Cpu, Expand, Fold, FolderOpened, Grid, HomeFilled, Tools } from '@element-plus/icons-vue'
+import { ChatLineSquare, Cpu, FolderOpened, HomeFilled } from '@element-plus/icons-vue'
 import { type Component, computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import IconMcp from '@/components/icons/IconMcp.vue'
+import IconOffice from '@/components/icons/IconOffice.vue'
+import IconSettings from '@/components/icons/IconSettings.vue'
 import IconSkills from '@/components/icons/IconSkills.vue'
 
 const router = useRouter()
@@ -60,11 +62,12 @@ interface NavItem {
 const _coreItems = computed<NavItem[]>(() => [
   { label: t('nav.home'), path: '/', icon: HomeFilled },
   { label: t('nav.chat'), path: '/chat', icon: ChatLineSquare },
+  { label: t('nav.office'), path: '/office', icon: IconOffice },
   { label: t('nav.files'), path: '/files', icon: FolderOpened },
 ])
 
 const _configItems = computed<NavItem[]>(() => [
-  { label: t('nav.settings'), path: '/settings/general', icon: Tools },
+  { label: t('nav.settings'), path: '/settings/general', icon: IconSettings },
   { label: t('nav.models'), path: '/settings/models', icon: Cpu },
   { label: t('nav.skills'), path: '/settings/skills', icon: IconSkills },
   { label: t('nav.mcp'), path: '/settings/mcp', icon: IconMcp },

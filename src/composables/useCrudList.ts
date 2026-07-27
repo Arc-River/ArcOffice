@@ -91,14 +91,20 @@ export function useCrudList<T extends { id: string }>(options: CrudOptions<T>) {
   }
 
   async function toggleEnabled(item: T, field: 'enabled' = 'enabled' as any): Promise<boolean> {
-    const list = items.value.map((i) => (i.id === item.id ? { ...i, [field]: !(i as any)[field] } : i)) as T[]
+    // Spread every item to strip Vue proxy wrappers before passing to persist
+    const list = items.value.map((i) => ({
+      ...toRaw(i),
+      [field]: i.id === item.id ? !(i as any)[field] : (i as any)[field],
+    })) as T[]
     return await persist(list)
   }
 
   async function persist(list: T[]): Promise<boolean> {
     try {
-      // Deep-clone via structuredClone (preceded by toRaw to unwrap Vue proxies)
-      await options.save(structuredClone(toRaw(list)))
+      // Use JSON round-trip to safely deep-clone and strip all Vue proxy wrappers.
+      // structuredClone fails on Vue Proxy-wrapped arrays (McpService.args etc).
+      const safe = JSON.parse(JSON.stringify(list))
+      await options.save(safe)
       items.value = list
       ElMessage.success('保存成功')
       return true

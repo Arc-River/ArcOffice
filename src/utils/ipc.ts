@@ -19,6 +19,10 @@ declare global {
       chatCompletion: (messages: unknown[]) => Promise<string>
       openFileDialog: () => Promise<string | null>
       selectDirectory: () => Promise<string | null>
+      readFileBinary: (filePath: string) => Promise<{ data: number[]; path: string }>
+      writeFileBinary: (filePath: string, data: number[]) => Promise<{ path: string }>
+      openOfficeFileDialog: () => Promise<string | null>
+      saveOfficeFileDialog: (defaultName: string) => Promise<string | null>
       getFileHistory: () => Promise<FileRecord[]>
       addFileHistory: (file: FileRecord) => Promise<void>
       createTask: (task: TaskCreate) => Promise<TaskRecord>

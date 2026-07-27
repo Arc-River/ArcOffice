@@ -4,8 +4,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // File operations
   listDirectory: (dirPath: string) => ipcRenderer.invoke('io:listDirectory', dirPath),
   readFileText: (filePath: string) => ipcRenderer.invoke('io:readFileText', filePath),
+  readFileBinary: (filePath: string) => ipcRenderer.invoke('io:readFileBinary', filePath),
+  writeFileBinary: (filePath: string, data: number[]) => ipcRenderer.invoke('io:writeFileBinary', filePath, data),
   openFileDialog: () => ipcRenderer.invoke('dialog:openFile'),
   selectDirectory: () => ipcRenderer.invoke('dialog:selectDirectory'),
+  openOfficeFileDialog: () => ipcRenderer.invoke('dialog:openOfficeFile'),
+  saveOfficeFileDialog: (defaultName: string) => ipcRenderer.invoke('dialog:saveOfficeFile', defaultName),
 
   // Database
   getConfig: (key: string) => ipcRenderer.invoke('db:getConfig', key),

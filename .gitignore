@@ -6,6 +6,9 @@ dist/
 dist-ssr/
 *.local
 
+# — OnlyOffice SDK（按需下载到 public/packages/） —
+public/packages/
+
 # — Electron —
 dist-electron/
 release/

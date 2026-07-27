@@ -22,6 +22,10 @@ export function setupDevMock() {
     // 对话框
     openFileDialog: async () => null,
     selectDirectory: async () => null,
+    openOfficeFileDialog: async () => null,
+    saveOfficeFileDialog: async () => null,
+    readFileBinary: async () => ({ data: [], path: '' }),
+    writeFileBinary: async () => ({ path: '' }),
 
     // 文件历史
     getFileHistory: async () => [],
@@ -58,7 +62,7 @@ export function setupDevMock() {
           '',
           '```typescript',
           'function process(input: string) {',
-          '  return `处理完成: ${input}`',
+          '  return `处理完成: ${' + 'input}`',
           '}',
           '```',
           '',
