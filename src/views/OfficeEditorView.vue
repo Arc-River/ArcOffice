@@ -29,7 +29,7 @@ function handleSave(path: string) {
   console.log('[OfficeEditorView] saved to:', path)
 }
 
-function handleError(msg: string) {
+function _handleError(msg: string) {
   console.error('[OfficeEditorView] error:', msg)
 }
 
@@ -44,7 +44,7 @@ function handleReady() {
       :file-path="filePath"
       :file-name="fileName"
       @save="handleSave"
-      @error="handleError"
+      @error="_handleError"
       @ready="handleReady"
     />
   </div>

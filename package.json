@@ -1,4 +1,6 @@
 {
+  "name": "ArcOffice",
+  "description": "An all-in-one office suite powered by OnlyOffice and AI",
   "private": true,
   "version": "0.1.0",
   "type": "module",
