@@ -3,9 +3,23 @@ import { ChatDotSquare, Delete, Plus } from '@element-plus/icons-vue'
 import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ChatSession } from '@/types/ai'
-import { formatRelativeTime } from '@/utils/format'
 
 const { t } = useI18n()
+
+function formatRelativeTime(dateStr: string): string {
+  const now = Date.now()
+  const date = new Date(dateStr).getTime()
+  const diff = now - date
+  const minutes = Math.floor(diff / 60_000)
+  const hours = Math.floor(diff / 3_600_000)
+  const days = Math.floor(diff / 86_400_000)
+
+  if (minutes < 1) return t('time.justNow')
+  if (minutes < 60) return t('time.minutesAgo', { n: minutes })
+  if (hours < 24) return t('time.hoursAgo', { n: hours })
+  if (days < 7) return t('time.daysAgo', { n: days })
+  return new Date(dateStr).toLocaleDateString()
+}
 
 defineProps<{
   sessions: ChatSession[]
@@ -23,14 +37,14 @@ const editingId = ref<string | null>(null)
 const editingName = ref('')
 const inputRefs = ref<Record<string, HTMLInputElement | null>>({})
 
-async function startRename(session: ChatSession) {
+async function _startRename(session: ChatSession) {
   editingId.value = session.id
   editingName.value = session.name
   await nextTick()
   inputRefs.value[session.id]?.focus()
 }
 
-function confirmRename() {
+function _confirmRename() {
   const id = editingId.value
   const name = editingName.value.trim()
   if (id && name) {
@@ -40,7 +54,7 @@ function confirmRename() {
   editingName.value = ''
 }
 
-function cancelRename() {
+function _cancelRename() {
   editingId.value = null
   editingName.value = ''
 }
@@ -72,16 +86,16 @@ function cancelRename() {
         <span
           v-if="editingId !== s.id"
           class="session-list__item-name"
-          @dblclick.stop="startRename(s)"
+          @dblclick.stop="_startRename(s)"
         >{{ s.name }}</span>
         <input
           v-else
           class="session-list__item-input"
           v-model="editingName"
           @click.stop
-          @keydown.enter="confirmRename"
-          @keydown.escape="cancelRename"
-          @blur="confirmRename"
+          @keydown.enter="_confirmRename"
+          @keydown.escape="_cancelRename"
+          @blur="_confirmRename"
           :ref="(el) => { if (el) inputRefs[s.id] = el as HTMLInputElement }"
         />
         <span class="session-list__item-time">{{ formatRelativeTime(s.updated_at) }}</span>

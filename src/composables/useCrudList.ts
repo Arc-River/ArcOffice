@@ -57,7 +57,7 @@ export function useCrudList<T extends { id: string }>(options: CrudOptions<T>) {
   }
 
   async function saveForm(): Promise<boolean> {
-    const list = [...items.value]
+    const list = [...items.value] as T[]
     if (editingId.value) {
       const idx = list.findIndex((s) => s.id === editingId.value)
       if (idx >= 0) {
@@ -83,7 +83,7 @@ export function useCrudList<T extends { id: string }>(options: CrudOptions<T>) {
         cancelButtonText: '取消',
         type: 'warning',
       })
-      const list = items.value.filter((i) => i.id !== item.id)
+      const list = items.value.filter((i) => i.id !== item.id) as T[]
       return await persist(list)
     } catch {
       return false
@@ -91,7 +91,7 @@ export function useCrudList<T extends { id: string }>(options: CrudOptions<T>) {
   }
 
   async function toggleEnabled(item: T, field: 'enabled' = 'enabled' as any): Promise<boolean> {
-    const list = items.value.map((i) => (i.id === item.id ? { ...i, [field]: !(i as any)[field] } : i))
+    const list = items.value.map((i) => (i.id === item.id ? { ...i, [field]: !(i as any)[field] } : i)) as T[]
     return await persist(list)
   }
 

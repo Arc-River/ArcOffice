@@ -12,7 +12,6 @@
  * - customId: 用于 scoped 样式覆盖
  */
 
-import MarkdownRender from 'markstream-vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/stores/theme'

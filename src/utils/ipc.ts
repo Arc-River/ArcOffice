@@ -1,4 +1,4 @@
-import type { AiModel, ChatMessage, ChatSession, McpService, SkillItem } from '@/types/ai'
+import type { AiModel, ChatCapabilities, ChatMessage, ChatSession, McpService, SkillItem } from '@/types/ai'
 import { IpcError } from '@/types/ipc'
 import type { FileRecord, TaskCreate, TaskRecord } from '@/types/models'
 
@@ -25,7 +25,11 @@ declare global {
       updateTaskProgress: (id: number, progress: number, status: string) => Promise<void>
       getTasks: () => Promise<TaskRecord[]>
       // Phase 2 AI additions
-      chatStream: (params: { model: AiModel; messages: ChatMessage[] }) => Promise<{ id: string }>
+      chatStream: (params: {
+        model: AiModel
+        messages: ChatMessage[]
+        capabilities?: ChatCapabilities
+      }) => Promise<{ id: string }>
       onStreamChunk: (callback: (data: { id: string; text: string }) => void) => () => void
       onStreamDone: (callback: (data: { id: string }) => void) => () => void
       onStreamError: (callback: (data: { id: string; error: string }) => void) => () => void

@@ -1,14 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type AnthropicT from '@anthropic-ai/sdk'
 import { exec as execCallback } from 'node:child_process'
-import fs from 'node:fs'
-import fsp from 'node:fs/promises'
-import path from 'node:path'
+import * as fs from 'node:fs'
+import * as fsp from 'node:fs/promises'
+import * as path from 'node:path'
 import { promisify } from 'node:util'
 import { app } from 'electron'
 import { getDb, getSkills, getMcpServices, queryRow } from './db'
 import { isPathAllowed as checkPathAllowed } from './path-utils'
-import { MCPManager, type MCPServiceConfig, type MCPToolDefinition } from './mcp-client'
+import { MCPManager, type MCPServiceConfig } from './mcp-client'
 
 const exec = promisify(execCallback)
 
@@ -84,9 +84,19 @@ function isPathAllowed(targetPath: string): boolean {
   return checkPathAllowed(targetPath, cachedWorkingDir)
 }
 
+interface ToolDef {
+  name: string
+  description: string
+  input_schema: {
+    type: 'object'
+    properties: Record<string, unknown>
+    required?: string[]
+  }
+}
+
 // ── File Operation Tools ──
 
-const FILE_TOOLS = [
+const FILE_TOOLS: ToolDef[] = [
   {
     name: 'read_file',
     description: 'Read text content from a file (UTF-8). Use for viewing source code, config, JSON, Markdown, and other plain text files.',
@@ -136,7 +146,7 @@ const FILE_TOOLS = [
   },
   {
     name: 'run_command',
-    description: 'Execute a shell command on the user's machine (non-interactive). Use for running build commands, installing dependencies, starting services, executing scripts, and viewing files. Commands run in the working directory. Note: interactive commands (vim, top, etc.) are not supported.',
+    description: `Execute a shell command on the user's machine (non-interactive). Use for running build commands, installing dependencies, starting services, executing scripts, and viewing files. Commands run in the working directory. Note: interactive commands (vim, top, etc.) are not supported.`,
     input_schema: {
       type: 'object',
       properties: {
@@ -255,8 +265,6 @@ async function executeWebSearch(input: Record<string, unknown>): Promise<unknown
     snippet: r.content,
     relevance: r.score,
   }))
-}
-
 }
 
 /**
@@ -394,8 +402,8 @@ async function buildSystemPrompt(capabilities?: ChatCapabilities): Promise<strin
  * Build additional tool definitions based on capabilities and configuration.
  * Currently supports web_search tool when enabled and configured.
  */
-async function buildDynamicTools(capabilities?: ChatCapabilities): Promise<typeof FILE_TOOLS> {
-  const extraTools: typeof FILE_TOOLS = []
+async function buildDynamicTools(capabilities?: ChatCapabilities): Promise<ToolDef[]> {
+  const extraTools: ToolDef[] = []
 
   if (capabilities?.webSearch) {
     const config = getWebSearchConfig()
@@ -412,6 +420,7 @@ async function buildDynamicTools(capabilities?: ChatCapabilities): Promise<typeo
           required: ['query'],
         },
       })
+    }
   }
 
   return extraTools
@@ -423,7 +432,7 @@ async function buildDynamicTools(capabilities?: ChatCapabilities): Promise<typeo
  */
 async function setupMCPTools(capabilities?: ChatCapabilities): Promise<{
   mcpManager: MCPManager | null
-  mcpToolDefs: typeof FILE_TOOLS
+  mcpToolDefs: ToolDef[]
 }> {
   if (!capabilities?.activeMcpServiceIds?.length) {
     return { mcpManager: null, mcpToolDefs: [] }
@@ -446,7 +455,7 @@ async function setupMCPTools(capabilities?: ChatCapabilities): Promise<{
     const mcpToolDefs = mcpTools.map((t) => ({
       name: t.name,
       description: t.description,
-      input_schema: t.inputSchema as typeof FILE_TOOLS[0]['input_schema'],
+      input_schema: t.inputSchema as ToolDef['input_schema'],
     }))
 
     return { mcpManager, mcpToolDefs }
@@ -590,14 +599,14 @@ When the user makes a request:
 
 # Markdown Reference
 
-Basics: # H1 **bold** *italic* ~~strikethrough~~ ==highlight== ++insert++ `code`
+Basics: # H1 **bold** *italic* ~~strikethrough~~ ==highlight== ++insert++ \`code\`
 Lists: - ul 1. ol -[ ] task > blockquote :smile:
-Code: ```lang  fenced code blocks (auto-highlight: ts/py/go/rust/css/bash/json/yaml etc.)
-Diff: ```diff  -deleted +added  context
+Code: \`\`\`lang  fenced code blocks (auto-highlight: ts/py/go/rust/css/bash/json/yaml etc.)
+Diff: \`\`\`diff  -deleted +added  context
 Tables: |col1|col2|  |---|---|  content
-Diagrams: ```mermaid  flowchart/sequence/gantt/mindmap/ER/class/state/C4
-      ```d2       system architecture, topology
-      ```infographic  bar/line/pie charts
+Diagrams: \`\`\`mermaid  flowchart/sequence/gantt/mindmap/ER/class/state/C4
+      \`\`\`d2       system architecture, topology
+      \`\`\`infographic  bar/line/pie charts
 Math: $E=mc^2$ (inline) $$formula$$ (block)
 Containers: ::: tip/warning/danger  content  :::
 Links: [text](URL)  ![image](URL)
@@ -845,7 +854,7 @@ async function streamOpenAI(
         content: textBuffer || null,
       }
       const toolCalls: Record<string, unknown>[] = []
-      for (const [, tc] of toolCallsMap) {
+      toolCallsMap.forEach((tc) => {
         toolCalls.push({
           id: tc.id,
           type: 'function',
@@ -854,14 +863,14 @@ async function streamOpenAI(
             arguments: tc.args,
           },
         })
-      }
+      })
       if (toolCalls.length > 0) {
         assistantMsg.tool_calls = toolCalls
       }
       oaiMessages.push(assistantMsg)
 
       // Execute tools and add tool result messages
-      for (const [, tc] of toolCallsMap) {
+      toolCallsMap.forEach(async (tc) => {
         try {
           let input: Record<string, unknown> = {}
           try {
@@ -890,7 +899,7 @@ async function streamOpenAI(
             content: err instanceof Error ? err.message : String(err),
           })
         }
-      }
+      })
     }
 
     sendChunk(event, id, '\n\n[Maximum operations reached. Please ask a new question to continue.]')

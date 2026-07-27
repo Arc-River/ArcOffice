@@ -2,8 +2,6 @@
 import { ElMessage } from 'element-plus'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import IconMcp from '@/components/icons/IconMcp.vue'
-import IconSkills from '@/components/icons/IconSkills.vue'
 import type { FileAttachment, McpService, SkillItem } from '@/types/ai'
 import { getSkillColor, getSkillIcon } from '@/utils/skill-icons'
 

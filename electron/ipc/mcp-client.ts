@@ -21,6 +21,7 @@ export interface MCPServiceConfig {
   args: string[]
   url: string
   env: Record<string, string>
+  enabled: boolean
 }
 
 export interface MCPToolDefinition {

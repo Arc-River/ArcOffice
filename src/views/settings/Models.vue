@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Aim, Check, Delete, Edit } from '@element-plus/icons-vue'
-import { onMounted, ref, toRaw } from 'vue'
+import { ref, toRaw } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCrudList } from '@/composables/useCrudList'
 import type { AiModel } from '@/types/ai'

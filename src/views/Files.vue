@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  ArrowRight,
   ArrowUp,
   ChatLineSquare,
   DataAnalysis,
@@ -13,10 +14,30 @@ import {
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { formatFileSize, formatSmartDate } from '@/utils/format'
 import { getElectronAPI } from '@/utils/ipc'
 
 const { t } = useI18n()
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function formatSmartDate(dateStr: string): string {
+  const now = Date.now()
+  const date = new Date(dateStr).getTime()
+  const diff = now - date
+  const minutes = Math.floor(diff / 60_000)
+  const hours = Math.floor(diff / 3_600_000)
+  const days = Math.floor(diff / 86_400_000)
+
+  if (minutes < 1) return t('time.justNow')
+  if (minutes < 60) return t('time.minutesAgo', { n: minutes })
+  if (hours < 24) return t('time.hoursAgo', { n: hours })
+  if (days < 7) return t('time.daysAgo', { n: days })
+  return new Date(dateStr).toLocaleDateString()
+}
 
 const api = getElectronAPI()
 const router = useRouter()
@@ -121,7 +142,7 @@ function updateBreadcrumbs(dirPath: string) {
   const crumbs: { name: string; path: string }[] = []
   let acc = ''
   for (const p of parts) {
-    acc += '/' + p
+    acc += `/${p}`
     crumbs.push({ name: p, path: acc })
   }
   breadcrumbs.value = crumbs
@@ -158,7 +179,7 @@ function goUp() {
 }
 
 function handleFileAction(entry: FileEntry) {
-  const fullPath = currentPath.value + '/' + entry.name
+  const fullPath = `${currentPath.value}/${entry.name}`
   if (entry.isDir) {
     navigateToDir(fullPath)
   } else {
@@ -189,7 +210,7 @@ onMounted(async () => {
   <div class="files">
     <div class="files__sidebar">
       <div class="files__sidebar-header">{{ t('files.sidebarTitle') }}</div>
-      <div class="files__categories">
+      <div class="files_categories">
         <button
           v-for="cat in categories"
           :key="cat.key"
@@ -292,7 +313,7 @@ onMounted(async () => {
     letter-spacing: 0.3px;
   }
 
-  &__categories {
+  &_categories {
     display: flex;
     flex-direction: column;
     gap: 2px;

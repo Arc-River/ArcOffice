@@ -237,13 +237,13 @@ export function useAiChat() {
       cleanups = [removeChunk, removeDone, removeError]
 
       // Deep-clone via JSON to strip Vue reactivity proxies (structuredClone throws on Proxy objects)
-      const chatParams: Record<string, unknown> = JSON.parse(
+      const chatParams = JSON.parse(
         JSON.stringify({
           model,
           messages: messages.value.slice(0, -1),
           capabilities,
         }),
-      )
+      ) as { model: AiModel; messages: ChatMessage[]; capabilities?: ChatCapabilities }
 
       // Start the stream — returns immediately, stream runs in background
       const result = await api.chatStream(chatParams)

@@ -13,19 +13,19 @@ const collapsed = ref(false)
 const panelWidth = ref(200)
 const isResizing = ref(false)
 
-function toggle() {
+function _toggle() {
   collapsed.value = !collapsed.value
 }
 
-function navigateTo(path: string) {
+function _navigateTo(path: string) {
   router.push(path)
 }
 
-function isActive(path: string): boolean {
+function _isActive(path: string): boolean {
   return route.path === path || route.path.startsWith(`${path}/`)
 }
 
-function startResize(e: MouseEvent) {
+function _startResize(e: MouseEvent) {
   e.preventDefault()
   isResizing.value = true
   document.body.style.cursor = 'col-resize'
@@ -57,13 +57,13 @@ interface NavItem {
   icon: Component | string
 }
 
-const coreItems = computed<NavItem[]>(() => [
+const _coreItems = computed<NavItem[]>(() => [
   { label: t('nav.home'), path: '/', icon: HomeFilled },
   { label: t('nav.chat'), path: '/chat', icon: ChatLineSquare },
   { label: t('nav.files'), path: '/files', icon: FolderOpened },
 ])
 
-const configItems = computed<NavItem[]>(() => [
+const _configItems = computed<NavItem[]>(() => [
   { label: t('nav.settings'), path: '/settings/general', icon: Tools },
   { label: t('nav.models'), path: '/settings/models', icon: Cpu },
   { label: t('nav.skills'), path: '/settings/skills', icon: IconSkills },
@@ -86,18 +86,18 @@ const configItems = computed<NavItem[]>(() => [
         text
         size="small"
         :title="collapsed ? t('chat.sidebarExpand') : t('chat.sidebarCollapse')"
-        @click="toggle"
+        @click="_toggle"
       />
     </div>
     <nav class="side-panel__nav" v-show="!collapsed">
       <div class="side-panel__group-label">{{ t('nav.groupCore') }}</div>
       <div class="side-panel__group">
         <button
-          v-for="item in coreItems"
+          v-for="item in _coreItems"
           :key="item.path"
           class="side-panel__item"
-          :class="{ 'side-panel__item--active': isActive(item.path) }"
-          @click="navigateTo(item.path)"
+          :class="{ 'side-panel__item--active': _isActive(item.path) }"
+          @click="_navigateTo(item.path)"
         >
           <el-icon class="side-panel__item-icon"><img v-if="typeof item.icon === 'string'" :src="item.icon" width="16" height="16" /><component v-else :is="item.icon" /></el-icon>
           <span>{{ item.label }}</span>
@@ -109,11 +109,11 @@ const configItems = computed<NavItem[]>(() => [
       <div class="side-panel__group-label">{{ t('nav.groupConfig') }}</div>
       <div class="side-panel__group">
         <button
-          v-for="item in configItems"
+          v-for="item in _configItems"
           :key="item.path"
           class="side-panel__item"
-          :class="{ 'side-panel__item--active': isActive(item.path) }"
-          @click="navigateTo(item.path)"
+          :class="{ 'side-panel__item--active': _isActive(item.path) }"
+          @click="_navigateTo(item.path)"
         >
           <el-icon class="side-panel__item-icon"><img v-if="typeof item.icon === 'string'" :src="item.icon" width="16" height="16" /><component v-else :is="item.icon" /></el-icon>
           <span>{{ item.label }}</span>
@@ -133,7 +133,7 @@ const configItems = computed<NavItem[]>(() => [
     <div
       v-if="!collapsed"
       class="side-panel__resize-handle"
-      @mousedown="startResize"
+      @mousedown="_startResize"
     ></div>
   </aside>
 </template>

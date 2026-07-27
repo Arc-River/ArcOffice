@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import MarkdownRender from 'markstream-vue'
 import { useThemeStore } from '@/stores/theme'
 import { chatPreset, codeBlockThemes } from '@/utils/markstream'
 
-const props = defineProps<{
+defineProps<{
   role: string
   content: string
   isStreaming?: boolean
