@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChatDotSquare, Delete, Plus } from '@element-plus/icons-vue'
 import { nextTick, ref } from 'vue'
 import type { ChatSession } from '@/types/ai'
 import { formatRelativeTime } from '@/utils/format'
@@ -46,12 +47,15 @@ function cancelRename() {
   <aside class="session-list">
     <div class="session-list__header">
       <span class="session-list__label">会话</span>
-      <button class="session-list__new" title="新建对话" @click="emit('newSession')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </button>
+      <el-button
+        class="session-list__new"
+        :icon="Plus"
+        circle
+        text
+        size="small"
+        title="新建对话"
+        @click="emit('newSession')"
+      />
     </div>
     <nav class="session-list__items">
       <button
@@ -61,9 +65,7 @@ function cancelRename() {
         :class="{ 'session-list__item--active': activeSession === s.id }"
         @click="emit('select', s.id)"
       >
-        <svg class="session-list__item-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20 2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14l4 4V4a2 2 0 0 0-2-2z" />
-        </svg>
+        <el-icon class="session-list__item-icon"><ChatDotSquare /></el-icon>
         <span
           v-if="editingId !== s.id"
           class="session-list__item-name"
@@ -81,21 +83,22 @@ function cancelRename() {
         />
         <span class="session-list__item-time">{{ formatRelativeTime(s.updated_at) }}</span>
         <el-popconfirm
-          title="确定删除此会话？"
+          title="确定删除？"
           confirm-button-text="删除"
           cancel-button-text="取消"
           @confirm="emit('delete', s.id)"
         >
           <template #reference>
-            <button
+            <el-button
               class="session-list__item-delete"
+              :icon="Delete"
+              circle
+              text
+              size="small"
+              type="danger"
               title="删除会话"
               @click.stop
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-              </svg>
-            </button>
+            />
           </template>
         </el-popconfirm>
       </button>
@@ -131,20 +134,7 @@ function cancelRename() {
   }
 
   &__new {
-    @include hoverable;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border: none;
-    background: transparent;
-    border-radius: var(--arc-radius-sm);
-    color: var(--arc-text-secondary);
-
-    &:hover {
-      color: var(--arc-brand-blue);
-    }
+    --el-button-size: 24px;
   }
 
   &__items {
@@ -213,27 +203,17 @@ function cancelRename() {
     &-time {
       flex-shrink: 0;
       @include font-body-xs;
+      font-size: 10px;
       color: var(--arc-text-placeholder);
     }
 
     &-delete {
       display: none;
-      align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      border: none;
-      background: transparent;
-      border-radius: var(--arc-radius-sm);
-      color: var(--arc-danger);
-      cursor: pointer;
-      padding: 0;
-      flex-shrink: 0;
     }
-  }
 
-  &__item:hover &__item-delete {
-    display: flex;
+    &:hover &-delete {
+      display: inline-flex;
+    }
   }
 }
 </style>

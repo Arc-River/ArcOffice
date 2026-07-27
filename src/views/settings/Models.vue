@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Aim, Check, Delete, Edit } from '@element-plus/icons-vue'
 import { onMounted, ref, toRaw } from 'vue'
 import { useCrudList } from '@/composables/useCrudList'
 import type { AiModel } from '@/types/ai'
@@ -9,6 +10,7 @@ const api = getElectronAPI()
 const activeModelId = ref('')
 const testingId = ref<string | null>(null)
 const testResult = ref<{ id: string; success: boolean; message: string } | null>(null)
+const advancedOpen = ref<string[]>([])
 
 const crud = useCrudList<AiModel>({
   load: async () => {
@@ -26,7 +28,7 @@ const crud = useCrudList<AiModel>({
     apiKey: '',
     baseUrl: '',
     temperature: 0.7,
-    maxTokens: 4096,
+    maxTokens: 1000000,
   }),
   getName: (m) => m.name,
   entityName: '模型',
@@ -112,15 +114,19 @@ async function testModel(model: AiModel) {
         <el-form-item label="API Key">
           <el-input v-model="crud.form.value.apiKey" type="password" show-password placeholder="sk-ant-***" />
         </el-form-item>
-        <el-form-item label="Base URL (自定义端点，可选)">
-          <el-input v-model="crud.form.value.baseUrl" placeholder="https://api.anthropic.com (留空使用默认)" />
-        </el-form-item>
-        <el-form-item label="温度 (Temperature)">
-          <el-slider v-model="crud.form.value.temperature" :min="0" :max="2" :step="0.1" />
-        </el-form-item>
-        <el-form-item label="Max Tokens">
-          <el-input-number v-model="crud.form.value.maxTokens" :min="1" :max="128000" :step="1024" />
-        </el-form-item>
+        <el-collapse v-model="advancedOpen">
+          <el-collapse-item title="高级选项" name="advanced">
+            <el-form-item label="Base URL (自定义端点)">
+              <el-input v-model="crud.form.value.baseUrl" placeholder="https://api.anthropic.com (留空使用默认)" />
+            </el-form-item>
+            <el-form-item label="温度 (Temperature)">
+              <el-slider v-model="crud.form.value.temperature" :min="0" :max="2" :step="0.1" />
+            </el-form-item>
+            <el-form-item label="Max Tokens">
+              <el-input-number v-model="crud.form.value.maxTokens" :min="1" :max="1000000" :step="1024" />
+            </el-form-item>
+          </el-collapse-item>
+        </el-collapse>
         <div class="settings-page__form-actions">
           <el-button @click="crud.cancelForm()">取消</el-button>
           <el-button type="primary" @click="saveModel" :disabled="!crud.form.value.name || !crud.form.value.modelId || !crud.form.value.apiKey">
@@ -154,32 +160,39 @@ async function testModel(model: AiModel) {
         <div class="settings-page__model-actions">
           <el-tag v-if="m.id === activeModelId" type="success" size="small">已激活</el-tag>
           <template v-else>
-            <el-button text size="small" @click="setActiveModel(m.id)">激活</el-button>
+            <el-button text size="small" :icon="Check" @click="setActiveModel(m.id)">激活</el-button>
           </template>
-          <el-button text size="small" @click="openEditForm(m)">编辑</el-button>
+          <el-button text size="small" :icon="Edit" @click="openEditForm(m)">编辑</el-button>
           <el-button
             text
             size="small"
-            type="danger"
+            type="warning"
+            :icon="testingId === m.id ? undefined : Aim"
             :loading="testingId === m.id"
             @click="testModel(m)"
           >
             {{ testingId === m.id ? '测试中…' : '测试' }}
           </el-button>
           <el-popconfirm
-            title="确定删除此模型？"
+            title="确定删除模型？"
             confirm-button-text="删除"
             cancel-button-text="取消"
             @confirm="deleteModel(m.id)"
           >
             <template #reference>
-              <el-button text size="small" type="danger">删除</el-button>
+              <el-button text size="small" :icon="Delete" type="danger">删除</el-button>
             </template>
           </el-popconfirm>
         </div>
-        <div v-if="testResult && testResult.id === m.id" class="settings-page__test-result" :class="{ 'is-success': testResult.success, 'is-error': !testResult.success }">
-          {{ testResult.message }}
-        </div>
+        <el-alert
+          v-if="testResult && testResult.id === m.id"
+          :type="testResult.success ? 'success' : 'error'"
+          :title="testResult.message"
+          show-icon
+          :closable="true"
+          @close="testResult = null"
+          class="settings-page__test-alert"
+        />
       </div>
     </div>
   </div>
@@ -187,26 +200,8 @@ async function testModel(model: AiModel) {
 
 <style lang="scss" scoped>
 .settings-page {
-  padding: var(--arc-space-lg);
-  max-width: 640px;
-
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--arc-space-xs);
-  }
-
-  &__title {
-    @include font-title-lg;
-    color: var(--arc-text-primary);
-  }
-
-  &__desc {
-    @include font-body-sm;
-    color: var(--arc-text-secondary);
-    margin-bottom: var(--arc-space-md);
-  }
+  // Using shared .settings-page from common.scss
+  // Only view-specific styles below
 
   &__form {
     background: var(--arc-bg-canvas);
@@ -225,25 +220,6 @@ async function testModel(model: AiModel) {
     display: flex;
     gap: var(--arc-space-xs);
     justify-content: flex-end;
-  }
-
-  &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--arc-space-sm);
-    padding: var(--arc-space-xxl);
-    text-align: center;
-  }
-
-  &__empty-text {
-    @include font-title;
-    color: var(--arc-text-primary);
-  }
-
-  &__empty-hint {
-    @include font-body-sm;
-    color: var(--arc-text-placeholder);
   }
 
   &__section {
@@ -274,12 +250,12 @@ async function testModel(model: AiModel) {
     flex-shrink: 0;
 
     &--connected {
-      background: #E6F0FF;
+      background: color-mix(in srgb, var(--arc-brand-blue) 10%, transparent);
       color: var(--arc-brand-blue);
     }
 
     &--disconnected {
-      background: #FFEAEA;
+      background: color-mix(in srgb, var(--arc-danger) 10%, transparent);
       color: var(--arc-danger);
     }
   }
@@ -306,21 +282,8 @@ async function testModel(model: AiModel) {
     flex-shrink: 0;
   }
 
-  &__test-result {
-    width: 100%;
-    @include font-body-xs;
-    padding: 4px 8px;
-    border-radius: var(--arc-radius-sm);
-
-    &.is-success {
-      background: #E8F9EE;
-      color: var(--arc-success);
-    }
-
-    &.is-error {
-      background: #FFEAEA;
-      color: var(--arc-danger);
-    }
+  &__test-alert {
+    margin-top: 6px;
   }
 }
 </style>

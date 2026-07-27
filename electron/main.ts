@@ -1,9 +1,20 @@
 import { app, BrowserWindow, session } from 'electron'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { open } from 'node:inspector'
 import { registerAllHandlers } from './ipc'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// 开发模式下启用 Node.js inspector，方便 chrome://inspect 调试主进程
+if (!app.isPackaged) {
+  try {
+    open(9229, '0.0.0.0', false)
+    console.log('[debug] Inspector listening on ws://0.0.0.0:9229')
+  } catch {
+    // inspector already open or not available
+  }
+}
 
 process.env.DIST = path.join(__dirname, '../dist')
 process.env.VITE_PUBLIC = app.isPackaged
@@ -46,9 +57,7 @@ function createWindow() {
   } else {
     win.loadFile(path.join(process.env.DIST!, 'index.html'))
   }
-  if (!app.isPackaged) {
-    win.webContents.openDevTools()
-  }
+  // 开发模式下按需打开 DevTools（⌘⌥I），或通过 chrome://inspect 调试主进程
 }
 
 app.on('ready', () => {

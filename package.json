@@ -34,11 +34,18 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39",
+    "@antv/infographic": "^0.2.19",
     "@element-plus/icons-vue": "^2.3.2",
+    "@terrastruct/d2": "^0.1.33",
     "element-plus": "^2.9",
+    "katex": "^0.18.1",
     "markstream-vue": "^1.0.7",
+    "mermaid": "^11.16.0",
     "pinia": "^2.3",
+    "shiki": "^4.3.1",
     "sql.js": "^1.14.1",
+    "stream-diffs": "^0.0.2",
+    "stream-markdown": "^0.0.16",
     "vue": "^3.5",
     "vue-i18n": "^10",
     "vue-router": "^4.5"

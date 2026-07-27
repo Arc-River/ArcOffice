@@ -1,19 +1,9 @@
 <script setup lang="ts">
-import {
-  ChatLineSquare,
-  Connection,
-  Cpu,
-  EditPen,
-  Expand,
-  Fold,
-  FolderOpened,
-  Grid,
-  HomeFilled,
-  Setting,
-  Tools,
-} from '@element-plus/icons-vue'
+import { ChatLineSquare, Cpu, Expand, Fold, FolderOpened, Grid, HomeFilled, Tools } from '@element-plus/icons-vue'
 import { type Component, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import IconMcp from '@/components/icons/IconMcp.vue'
+import IconSkills from '@/components/icons/IconSkills.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -62,7 +52,7 @@ function startResize(e: MouseEvent) {
 interface NavItem {
   label: string
   path: string
-  icon: Component
+  icon: Component | string
 }
 
 const coreItems: NavItem[] = [
@@ -74,9 +64,8 @@ const coreItems: NavItem[] = [
 const configItems: NavItem[] = [
   { label: '通用', path: '/settings/general', icon: Tools },
   { label: '模型', path: '/settings/models', icon: Cpu },
-  { label: 'Skills', path: '/settings/skills', icon: Setting },
-  { label: 'MCP', path: '/settings/mcp', icon: Connection },
-  { label: 'Prompt', path: '/settings/prompts', icon: EditPen },
+  { label: 'Skills', path: '/settings/skills', icon: IconSkills },
+  { label: 'MCP', path: '/settings/mcp', icon: IconMcp },
 ]
 </script>
 
@@ -88,12 +77,15 @@ const configItems: NavItem[] = [
   >
     <div class="side-panel__header">
       <span v-if="!collapsed" class="side-panel__label">导航</span>
-      <button class="side-panel__toggle" @click="toggle" :title="collapsed ? '展开' : '折叠'">
-        <el-icon :size="16">
-          <Fold v-if="!collapsed" />
-          <Expand v-else />
-        </el-icon>
-      </button>
+      <el-button
+        class="side-panel__toggle"
+        :icon="collapsed ? Expand : Fold"
+        circle
+        text
+        size="small"
+        :title="collapsed ? '展开' : '折叠'"
+        @click="toggle"
+      />
     </div>
     <nav class="side-panel__nav" v-show="!collapsed">
       <div class="side-panel__group-label">核心</div>
@@ -105,7 +97,7 @@ const configItems: NavItem[] = [
           :class="{ 'side-panel__item--active': isActive(item.path) }"
           @click="navigateTo(item.path)"
         >
-          <el-icon class="side-panel__item-icon"><component :is="item.icon" /></el-icon>
+          <el-icon class="side-panel__item-icon"><img v-if="typeof item.icon === 'string'" :src="item.icon" width="16" height="16" /><component v-else :is="item.icon" /></el-icon>
           <span>{{ item.label }}</span>
         </button>
       </div>
@@ -121,7 +113,7 @@ const configItems: NavItem[] = [
           :class="{ 'side-panel__item--active': isActive(item.path) }"
           @click="navigateTo(item.path)"
         >
-          <el-icon class="side-panel__item-icon"><component :is="item.icon" /></el-icon>
+          <el-icon class="side-panel__item-icon"><img v-if="typeof item.icon === 'string'" :src="item.icon" width="16" height="16" /><component v-else :is="item.icon" /></el-icon>
           <span>{{ item.label }}</span>
         </button>
       </div>
@@ -177,9 +169,7 @@ const configItems: NavItem[] = [
     }
 
     .side-panel__toggle {
-      width: 24px;
-      height: 24px;
-      padding: 0;
+      --el-button-size: 24px;
     }
   }
 
@@ -199,17 +189,7 @@ const configItems: NavItem[] = [
   }
 
   &__toggle {
-    @include hoverable;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border: none;
-    background: transparent;
-    border-radius: var(--arc-radius-sm);
-    font-size: 14px;
-    color: var(--arc-text-secondary);
+    --el-button-size: 24px;
   }
 
   &__nav {

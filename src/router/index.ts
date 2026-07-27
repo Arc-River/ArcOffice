@@ -54,12 +54,6 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/settings/Mcp.vue'),
     meta: { title: 'MCP' },
   },
-  {
-    path: '/settings/prompts',
-    name: 'settings-prompts',
-    component: () => import('@/views/settings/Prompts.vue'),
-    meta: { title: 'Prompt 模板' },
-  },
 ]
 
 const router = createRouter({

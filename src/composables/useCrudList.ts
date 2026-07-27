@@ -1,5 +1,5 @@
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, toRaw } from 'vue'
 
 export interface CrudOptions<T extends { id: string }> {
   /** Async function to load all items */
@@ -47,7 +47,7 @@ export function useCrudList<T extends { id: string }>(options: CrudOptions<T>) {
   function openEditForm(item: T) {
     editingId.value = item.id
     // Deep clone to avoid mutating the source
-    form.value = JSON.parse(JSON.stringify(item))
+    form.value = structuredClone(toRaw(item))
     showDialog.value = true
   }
 
@@ -97,12 +97,14 @@ export function useCrudList<T extends { id: string }>(options: CrudOptions<T>) {
 
   async function persist(list: T[]): Promise<boolean> {
     try {
-      await options.save(list)
+      // Deep-clone via structuredClone (preceded by toRaw to unwrap Vue proxies)
+      await options.save(structuredClone(toRaw(list)))
       items.value = list
       ElMessage.success('保存成功')
       return true
-    } catch {
-      ElMessage.error('保存失败')
+    } catch (err) {
+      console.error(`[useCrudList] 保存${options.entityName || '项目'}失败:`, err)
+      ElMessage.error(`保存失败: ${err instanceof Error ? err.message : String(err)}`)
       return false
     }
   }

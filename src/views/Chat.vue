@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { ArrowRight, Operation } from '@element-plus/icons-vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAiChat } from '@/composables/useAiChat'
-import type { PromptTemplate, SkillItem } from '@/types/ai'
+import type { FileAttachment, McpService, SkillItem } from '@/types/ai'
 import { getElectronAPI } from '@/utils/ipc'
 
 const api = getElectronAPI()
@@ -23,25 +24,70 @@ const {
 
 const route = useRoute()
 const router = useRouter()
-const currentFile = ref<string | null>(null)
+const attachments = ref<FileAttachment[]>([])
 const sidebarVisible = ref(true)
 const isAttaching = ref(false)
-const prompts = ref<PromptTemplate[]>([])
 const skills = ref<SkillItem[]>([])
+const mcpServices = ref<McpService[]>([])
 const webSearch = ref(false)
+const webSearchConfigured = ref(false)
+const activeSkillIds = ref<string[]>([])
+const activeMcpIds = ref<string[]>([])
+const messagesEl = ref<HTMLElement | null>(null)
+const autoScroll = ref(true)
+
+// 自动滚动到最底部，显示最新内容
+function scrollToBottom() {
+  const el = messagesEl.value
+  if (!el) return
+  nextTick(() => {
+    el.scrollTop = el.scrollHeight
+  })
+}
+
+// 流式内容变化时自动滚动到最新内容
+let scrollRaf: number | null = null
+watch(
+  () => messages.value.at(-1)?.content,
+  () => {
+    if (!autoScroll.value) return
+    if (scrollRaf) cancelAnimationFrame(scrollRaf)
+    scrollRaf = requestAnimationFrame(() => {
+      scrollToBottom()
+      scrollRaf = null
+    })
+  },
+)
+
+// 用户手动滚动时，判断是否应暂停自动滚动
+function handleScroll() {
+  const el = messagesEl.value
+  if (!el) return
+  const threshold = 120 // 底部 120px 以内视为"在底部"
+  autoScroll.value = el.scrollHeight - el.scrollTop - el.clientHeight < threshold
+}
 
 onMounted(async () => {
   loadSessions()
 
-  // 加载 Prompt 模板和 Skills
+  // 加载 Skills、MCP 服务和 Web Search 配置
   if (api) {
     try {
-      prompts.value = await api.getPrompts()
+      skills.value = await api.getSkills()
     } catch {
       /* ignore */
     }
     try {
-      skills.value = await api.getSkills()
+      mcpServices.value = await api.getMcpServices()
+    } catch {
+      /* ignore */
+    }
+    try {
+      const raw = await api.getConfig('web_search_config')
+      if (raw) {
+        const cfg = JSON.parse(raw)
+        webSearchConfigured.value = !!cfg.api_key
+      }
     } catch {
       /* ignore */
     }
@@ -54,14 +100,24 @@ onMounted(async () => {
     const fileName = filePath.split(/[/\\]/).pop() || filePath
     currentFile.value = fileName
     nextTick(() => {
-      sendMessage(`请帮我处理文件「${fileName}」，路径：${filePath}`)
+      sendMessage(`「${fileName}」，路径：${filePath}`)
     })
   }
 })
 
 async function handleSend(text: string) {
-  if (!text.trim()) return
-  await sendMessage(text)
+  if (!text.trim() && attachments.value.length === 0) return
+  const files = attachments.value.length > 0 ? [...attachments.value] : undefined
+  attachments.value = []
+  await sendMessage(
+    text,
+    {
+      activeSkillIds: activeSkillIds.value,
+      activeMcpServiceIds: activeMcpIds.value,
+      webSearch: webSearch.value,
+    },
+    files,
+  )
 }
 
 async function handleAttachFile() {
@@ -72,17 +128,37 @@ async function handleAttachFile() {
   if (!filePath) return
 
   const fileName = filePath.split(/[/\\]/).pop() || filePath
-  currentFile.value = fileName
+  let content = ''
+  try {
+    content = await api.readFileText(filePath)
+  } catch {
+    // binary or unreadable file — still attach with empty content
+  }
 
-  await sendMessage(`请帮我处理文件「${fileName}」，路径：${filePath}`)
+  attachments.value.push({
+    name: fileName,
+    path: filePath,
+    content,
+    size: content.length,
+  })
 }
 
-function handleInsertPrompt(p: PromptTemplate) {
-  sendMessage(p.content)
+function handleRemoveAttachment(index: number) {
+  attachments.value.splice(index, 1)
 }
 
-function handleSelectSkill(_skillName: string) {
-  sendMessage(`请使用技能: ${_skillName}`)
+function toggleListItem(list: string[], id: string) {
+  const idx = list.indexOf(id)
+  if (idx >= 0) list.splice(idx, 1)
+  else list.push(id)
+}
+
+function handleToggleSkill(skillId: string) {
+  toggleListItem(activeSkillIds.value, skillId)
+}
+
+function handleToggleMcp(serviceId: string) {
+  toggleListItem(activeMcpIds.value, serviceId)
 }
 
 function handleToggleWebSearch(enabled: boolean) {
@@ -90,7 +166,10 @@ function handleToggleWebSearch(enabled: boolean) {
 }
 
 function handleNewSession() {
-  currentFile.value = null
+  attachments.value = []
+  activeSkillIds.value = []
+  activeMcpIds.value = []
+  webSearch.value = false
   createSession()
 }
 </script>
@@ -108,27 +187,20 @@ function handleNewSession() {
     />
     <div class="chat__main">
       <div class="chat__toolbar">
-        <button class="chat__sidebar-toggle" @click="sidebarVisible = !sidebarVisible" :title="sidebarVisible ? '收起侧栏' : '展开侧栏'">
-          <svg v-if="sidebarVisible" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
+        <el-button
+          :icon="sidebarVisible ? Operation : ArrowRight"
+          text
+          size="small"
+          class="chat__sidebar-toggle"
+          :title="sidebarVisible ? '收起侧栏' : '展开侧栏'"
+          @click="sidebarVisible = !sidebarVisible"
+        />
       </div>
-      <div class="chat__messages">
+      <div class="chat__messages" ref="messagesEl" @scroll="handleScroll">
         <template v-if="messages.length === 0">
           <div class="chat__empty">
             <div class="chat__empty-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                <rect x="2" y="2" width="8" height="8" rx="1.5" fill="var(--arc-brand-blue)" opacity="0.7" />
-                <rect x="14" y="2" width="8" height="8" rx="1.5" fill="var(--arc-brand-blue)" opacity="0.5" />
-                <rect x="2" y="14" width="8" height="8" rx="1.5" fill="var(--arc-brand-blue)" opacity="0.5" />
-                <rect x="14" y="14" width="8" height="8" rx="1.5" fill="var(--arc-brand-blue)" />
-              </svg>
+              <img src="/logo.svg" alt="ArcOffice" width="48" height="48" />
             </div>
             <p class="chat__empty-text">开始与 AI 对话</p>
             <p class="chat__empty-hint">
@@ -143,17 +215,38 @@ function handleNewSession() {
           :content="msg.content"
           :is-streaming="isStreaming && index === messages.length - 1 && msg.role === 'assistant'"
         />
+        <!-- 用户向上滚动时出现"回到底部"按钮 -->
+        <Transition name="fade">
+          <el-button
+            v-if="!autoScroll && messages.length > 0"
+            class="chat__scroll-bottom"
+            round
+            size="small"
+            @click="scrollToBottom(); autoScroll = true"
+            title="回到最新回复"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+            <span style="margin-left:4px" v-if="isStreaming">AI 正在回复中</span>
+            <span style="margin-left:4px" v-else>回到最新消息</span>
+          </el-button>
+        </Transition>
       </div>
       <ChatInput
-        :current-file="currentFile"
+        :attachments="attachments"
         :disabled="isStreaming || isAttaching"
         :web-search="webSearch"
-        :prompts="prompts"
+        :web-search-configured="webSearchConfigured"
         :skills="skills"
+        :mcp-services="mcpServices"
+        :active-skill-ids="activeSkillIds"
+        :active-mcp-ids="activeMcpIds"
         @send="handleSend"
         @attach="handleAttachFile"
-        @insert-prompt="handleInsertPrompt"
-        @select-skill="handleSelectSkill"
+        @remove-attachment="handleRemoveAttachment"
+        @toggle-skill="handleToggleSkill"
+        @toggle-mcp="handleToggleMcp"
         @toggle-web-search="handleToggleWebSearch"
       />
     </div>
@@ -182,21 +275,7 @@ function handleNewSession() {
   }
 
   &__sidebar-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border: none;
-    background: transparent;
-    border-radius: var(--arc-radius-sm);
-    color: var(--arc-text-secondary);
-    cursor: pointer;
-
-    &:hover {
-      color: var(--arc-brand-blue);
-      background: var(--arc-bg-hover);
-    }
+    --el-button-size: 28px;
   }
 
   &__messages {
@@ -232,5 +311,25 @@ function handleNewSession() {
     @include font-body-sm;
     color: var(--arc-text-placeholder);
   }
+
+  // 回到底部按钮
+  &__scroll-bottom {
+    position: sticky;
+    bottom: var(--arc-space-sm);
+    align-self: center;
+    z-index: 10;
+    margin-top: -36px;
+    box-shadow: var(--arc-shadow-md);
+  }
+}
+
+// 淡入淡出过渡（用于 scroll-bottom 按钮）
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 200ms ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

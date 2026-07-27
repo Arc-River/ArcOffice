@@ -207,50 +207,10 @@ function saveForm() {
 
 <style lang="scss" scoped>
 .settings-page {
-  padding: var(--arc-space-lg);
+  // Using shared .settings-page from common.scss, with wider max-width
   max-width: 720px;
 
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--arc-space-xs);
-  }
-
-  &__title {
-    @include font-title-lg;
-    color: var(--arc-text-primary);
-  }
-
-  &__desc {
-    @include font-body-sm;
-    color: var(--arc-text-secondary);
-    margin-bottom: var(--arc-space-md);
-  }
-
-  &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--arc-space-xxl);
-    gap: var(--arc-space-sm);
-    text-align: center;
-  }
-
-  &__empty-icon {
-    margin-bottom: var(--arc-space-xs);
-  }
-
-  &__empty-text {
-    @include font-title;
-    color: var(--arc-text-primary);
-  }
-
-  &__empty-hint {
-    @include font-body-sm;
-    color: var(--arc-text-placeholder);
-  }
+  // Only view-specific styles below
 
   &__section {
     display: flex;

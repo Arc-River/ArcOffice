@@ -55,20 +55,12 @@ onMounted(async () => {
             </span>
           </div>
         </div>
-        <div class="task-card__progress">
-          <div class="task-card__progress-bar">
-            <div
-              class="task-card__progress-fill"
-              :style="{ width: `${task.progress}%` }"
-              :class="{
-                'task-card__progress-fill--success': task.status === 'completed',
-                'task-card__progress-fill--warning': task.status === 'warning',
-                'task-card__progress-fill--danger': task.status === 'failed',
-              }"
-            />
-          </div>
-          <span class="task-card__progress-label">{{ task.progress }}%</span>
-        </div>
+        <el-progress
+          :percentage="task.progress"
+          :status="task.status === 'failed' ? 'exception' : task.status === 'completed' ? 'success' : ''"
+          :stroke-width="4"
+          class="task-card__progress"
+        />
         <div v-if="task.log" class="task-card__log">{{ task.log }}</div>
       </div>
     </div>
@@ -157,44 +149,7 @@ onMounted(async () => {
   }
 
   &__progress {
-    display: flex;
-    align-items: center;
-    gap: var(--arc-space-xs);
     margin-bottom: var(--arc-space-xs);
-  }
-
-  &__progress-bar {
-    flex: 1;
-    height: 4px;
-    background: var(--arc-bg-hover);
-    border-radius: var(--arc-radius-full);
-    overflow: hidden;
-  }
-
-  &__progress-fill {
-    height: 100%;
-    background: var(--arc-brand-blue);
-    border-radius: var(--arc-radius-full);
-    transition: width 300ms ease;
-
-    &--success {
-      background: var(--arc-success);
-    }
-
-    &--warning {
-      background: var(--arc-warning);
-    }
-
-    &--danger {
-      background: var(--arc-danger);
-    }
-  }
-
-  &__progress-label {
-    @include font-body-xs;
-    color: var(--arc-text-secondary);
-    min-width: 36px;
-    text-align: right;
   }
 
   &__log {
@@ -204,29 +159,29 @@ onMounted(async () => {
   }
 }
 
-// Status tag colors (matching design_token.html)
+// Status tag colors — using color-mix for theme-consistent transparency
 :deep(.tag-pending) {
   background: var(--arc-bg-hover);
   color: var(--arc-text-secondary);
 }
 
 :deep(.tag-processing) {
-  background: #E8F4FF;
+  background: color-mix(in srgb, var(--arc-brand-blue) 12%, transparent);
   color: var(--arc-brand-blue);
 }
 
 :deep(.tag-success) {
-  background: #E8FFE8;
+  background: color-mix(in srgb, var(--arc-success) 12%, transparent);
   color: var(--arc-success);
 }
 
 :deep(.tag-warning) {
-  background: #FFF3E8;
+  background: color-mix(in srgb, var(--arc-warning) 12%, transparent);
   color: var(--arc-warning);
 }
 
 :deep(.tag-error) {
-  background: #FFE8E8;
+  background: color-mix(in srgb, var(--arc-danger) 12%, transparent);
   color: var(--arc-danger);
 }
 </style>

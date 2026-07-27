@@ -45,12 +45,7 @@ function openFile() {
   >
     <div class="home__hero">
       <div class="home__logo">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-          <rect x="2" y="2" width="8" height="8" rx="1.5" fill="var(--arc-brand-blue)" />
-          <rect x="14" y="2" width="8" height="8" rx="1.5" fill="var(--arc-brand-blue)" opacity="0.7" />
-          <rect x="2" y="14" width="8" height="8" rx="1.5" fill="var(--arc-brand-blue)" opacity="0.7" />
-          <rect x="14" y="14" width="8" height="8" rx="1.5" fill="var(--arc-brand-blue)" />
-        </svg>
+        <img src="/logo.svg" alt="ArcOffice" width="64" height="64" />
       </div>
       <h1 class="home__title">ArcOffice</h1>
       <p class="home__subtitle">对话式 Office 文件处理工具</p>
@@ -115,7 +110,7 @@ function openFile() {
   transition: background-color 200ms ease;
 
   &--dragover {
-    background: rgba(22, 119, 255, 0.04);
+    background: color-mix(in srgb, var(--arc-brand-blue) 4%, transparent);
   }
 
   &__hero {
@@ -167,7 +162,7 @@ function openFile() {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(22, 119, 255, 0.06);
+    background: color-mix(in srgb, var(--arc-brand-blue) 6%, transparent);
     border: 2px dashed var(--arc-brand-blue);
     border-radius: var(--arc-radius-xl);
     z-index: 10;

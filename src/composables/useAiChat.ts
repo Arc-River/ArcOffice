@@ -1,5 +1,5 @@
-import { ref, toRaw } from 'vue'
-import type { AiModel, ChatMessage, ChatSession } from '@/types/ai'
+import { ref } from 'vue'
+import type { AiModel, ChatCapabilities, ChatMessage, ChatSession, FileAttachment } from '@/types/ai'
 import { getElectronAPI } from '@/utils/ipc'
 
 export function useAiChat() {
@@ -104,7 +104,7 @@ export function useAiChat() {
     const sid = currentSessionId.value
     if (!sid || !api || !currentSessionDirty) return
     try {
-      await api.saveMessages(sid, toRaw(messages.value))
+      await api.saveMessages(sid, JSON.parse(JSON.stringify(messages.value)))
       currentSessionDirty = false
     } catch {
       // ignore
@@ -143,15 +143,38 @@ export function useAiChat() {
 
   // ── Send Message ──
 
-  async function sendMessage(text: string) {
-    if (isStreaming.value || !text.trim()) return
+  async function sendMessage(text: string, capabilities?: ChatCapabilities, attachments?: FileAttachment[]) {
+    const textContent = text.trim()
+    const hasText = textContent.length > 0
+    const hasFiles = attachments !== undefined && attachments.length > 0
+    if (!hasText && !hasFiles) return
+    if (isStreaming.value) return
+
+    // Check if Electron API is available
+    if (!api) {
+      messages.value.push({
+        role: 'assistant',
+        content: 'Electron API 不可用，请在 Electron 环境中运行该应用。',
+      })
+      return
+    }
 
     // Auto-create session if none active
     if (!currentSessionId.value) {
-      // Derive name from first ~20 chars of the message
-      const name = text.length > 20 ? `${text.slice(0, 20)}…` : text
-      const created = await createSession(name)
-      if (!created) return
+      // Derive name from text or first attachment name
+      const sessionName = hasText
+        ? textContent.length > 20
+          ? `${textContent.slice(0, 20)}…`
+          : textContent
+        : attachments?.[0]?.name || '文件分析'
+      const created = await createSession(sessionName)
+      if (!created) {
+        messages.value.push({
+          role: 'assistant',
+          content: '创建会话失败，请重试。',
+        })
+        return
+      }
     }
 
     const model = await getActiveModel()
@@ -163,8 +186,16 @@ export function useAiChat() {
       return
     }
 
-    // Add user message
-    messages.value.push({ role: 'user', content: text })
+    // Build user message: user prompt + optional file references
+    let userContent = textContent
+    if (hasFiles) {
+      const fileList = (attachments as FileAttachment[]).map((f) => {
+        const sizeKB = (f.size / 1024).toFixed(1)
+        return `- **${f.name}** (\`${f.path}\`) -- ${sizeKB} KB`
+      })
+      userContent = [textContent, '', '---', '## 已附文件', '', ...fileList].join('\n')
+    }
+    messages.value.push({ role: 'user', content: userContent })
     currentSessionDirty = true
 
     // Add placeholder assistant message
@@ -173,15 +204,6 @@ export function useAiChat() {
     const assistantIndex = messages.value.length - 1
 
     isStreaming.value = true
-
-    if (!api) {
-      messages.value[assistantIndex] = {
-        ...messages.value[assistantIndex],
-        content: 'Electron API 不可用，请在 Electron 环境中运行。',
-      }
-      isStreaming.value = false
-      return
-    }
 
     try {
       // Register stream listeners
@@ -214,11 +236,17 @@ export function useAiChat() {
 
       cleanups = [removeChunk, removeDone, removeError]
 
+      // Deep-clone via JSON to strip Vue reactivity proxies (structuredClone throws on Proxy objects)
+      const chatParams: Record<string, unknown> = JSON.parse(
+        JSON.stringify({
+          model,
+          messages: messages.value.slice(0, -1),
+          capabilities,
+        }),
+      )
+
       // Start the stream — returns immediately, stream runs in background
-      const result = await api.chatStream({
-        model: toRaw(model),
-        messages: toRaw(messages.value).slice(0, -1),
-      })
+      const result = await api.chatStream(chatParams)
       currentStreamId.value = result.id
     } catch (err) {
       isStreaming.value = false

@@ -48,15 +48,28 @@ export interface SkillItem {
   id: string
   name: string
   description: string
+  content?: string
+  builtin?: boolean
   enabled: boolean
   created_at: string
 }
 
-// ── Prompt Template ──
+// ── Chat Capabilities (工具/技能/搜索等在会话中的激活状态) ──
 
-export interface PromptTemplate {
-  id: string
+export interface ChatCapabilities {
+  /** 用户选中的 Skill ID 列表，其 content 会注入到 system prompt */
+  activeSkillIds: string[]
+  /** 用户选中的 MCP Service ID 列表（预留） */
+  activeMcpServiceIds: string[]
+  /** 是否启用 Web Search */
+  webSearch: boolean
+}
+
+// ── File Attachment ──
+
+export interface FileAttachment {
   name: string
+  path: string
   content: string
-  created_at: string
+  size: number
 }

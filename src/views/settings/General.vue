@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ElMessage } from 'element-plus'
 import { onMounted, ref } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { getElectronAPI } from '@/utils/ipc'
@@ -14,6 +15,11 @@ const restoreSession = ref(true)
 const language = ref('zh-CN')
 const workingDir = ref('')
 
+// Web Search config
+const wsProvider = ref('tavily')
+const wsApiKey = ref('')
+const wsSaving = ref(false)
+
 onMounted(async () => {
   if (!api) return
   try {
@@ -21,6 +27,18 @@ onMounted(async () => {
     if (saved) workingDir.value = saved
   } catch {
     // DB not available
+  }
+
+  // Load web search config
+  try {
+    const raw = await api.getConfig('web_search_config')
+    if (raw) {
+      const config = JSON.parse(raw)
+      wsProvider.value = config.provider || 'tavily'
+      wsApiKey.value = config.api_key || ''
+    }
+  } catch {
+    // ignore
   }
 })
 
@@ -33,6 +51,19 @@ async function selectWorkingDir() {
     await api.setConfig('working_dir', dir)
   } catch {
     // ignore
+  }
+}
+
+async function saveWebSearch() {
+  if (!api) return
+  wsSaving.value = true
+  try {
+    await api.setConfig('web_search_config', JSON.stringify({ provider: wsProvider.value, api_key: wsApiKey.value }))
+    ElMessage.success('Web Search 配置已保存')
+  } catch {
+    ElMessage.error('保存失败')
+  } finally {
+    wsSaving.value = false
   }
 }
 </script>
@@ -70,7 +101,7 @@ async function selectWorkingDir() {
           <div class="settings-page__row-desc">AI 文件操作和文件浏览的工作空间</div>
         </div>
         <div class="settings-page__dir-picker">
-          <span class="settings-page__dir-path" :title="workingDir">{{ workingDir || '未设置（默认使用文档目录）' }}</span>
+          <span class="settings-page__dir-path" :title="workingDir">{{ workingDir || '未设置' }}</span>
           <el-button size="small" @click="selectWorkingDir">选择目录</el-button>
         </div>
       </div>
@@ -91,19 +122,47 @@ async function selectWorkingDir() {
         </el-select>
       </div>
     </div>
+
+    <!-- Web Search 配置 -->
+    <h2 class="settings-page__title" style="margin-top: var(--arc-space-lg)">Web Search</h2>
+    <div class="settings-page__section">
+      <div class="settings-page__row">
+        <div>
+          <div class="settings-page__row-label">搜索服务商</div>
+          <div class="settings-page__row-desc">目前仅支持 Tavily</div>
+        </div>
+        <el-select v-model="wsProvider" size="small" style="width: 140px" disabled>
+          <el-option value="tavily" label="Tavily" />
+        </el-select>
+      </div>
+      <div class="settings-page__row">
+        <div style="flex: 1; min-width: 0;">
+          <div class="settings-page__row-label">API Key</div>
+          <div class="settings-page__row-desc">从 <a href="https://tavily.com" target="_blank" rel="noopener">tavily.com</a> 获取，每月 1000 次免费查询</div>
+        </div>
+        <div class="settings-page__ws-api-key">
+          <el-input
+            v-model="wsApiKey"
+            type="password"
+            show-password
+            placeholder="tvly-..."
+            size="small"
+            style="width: 200px"
+            clearable
+          />
+          <el-button size="small" type="primary" :loading="wsSaving" @click="saveWebSearch">
+            保存
+          </el-button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .settings-page {
-  padding: var(--arc-space-lg);
-  max-width: 640px;
-
-  &__title {
-    @include font-title-lg;
-    color: var(--arc-text-primary);
-    margin-bottom: var(--arc-space-md);
-  }
+  // Using shared .settings-page from common.scss
+  // Only view-specific styles below
 
   &__section {
     background: var(--arc-bg-canvas);
@@ -150,6 +209,21 @@ async function selectWorkingDir() {
     white-space: nowrap;
     flex: 1;
     min-width: 0;
+  }
+
+  &__ws-api-key {
+    display: flex;
+    align-items: center;
+    gap: var(--arc-space-xs);
+  }
+
+  a {
+    color: var(--arc-brand-blue);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 </style>

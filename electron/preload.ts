@@ -50,16 +50,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   testConnection: (model: unknown) => ipcRenderer.invoke('ai:testConnection', model),
 
   // Sessions
-  listSessions: () => ipcRenderer.invoke('sessions:list'),
-  createSession: (name: string) => ipcRenderer.invoke('sessions:create', name),
-  renameSession: (id: string, name: string) => ipcRenderer.invoke('sessions:rename', id, name),
-  deleteSession: (id: string) => ipcRenderer.invoke('sessions:delete', id),
+  listSessions: () => ipcRenderer.invoke('sessions:listSessions'),
+  createSession: (name: string) => ipcRenderer.invoke('sessions:createSession', name),
+  renameSession: (id: string, name: string) => ipcRenderer.invoke('sessions:renameSession', id, name),
+  deleteSession: (id: string) => ipcRenderer.invoke('sessions:deleteSession', id),
   getMessages: (sessionId: string) => ipcRenderer.invoke('sessions:getMessages', sessionId),
   saveMessages: (sessionId: string, messages: unknown) => ipcRenderer.invoke('sessions:saveMessages', sessionId, messages),
-
-  // Prompt templates
-  getPrompts: () => ipcRenderer.invoke('db:getPrompts'),
-  savePrompts: (prompts: unknown) => ipcRenderer.invoke('db:savePrompts', prompts),
 
   // Skills
   getSkills: () => ipcRenderer.invoke('db:getSkills'),

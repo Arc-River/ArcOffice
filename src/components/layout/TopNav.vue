@@ -35,17 +35,19 @@ const themeLabel = computed(() => {
       <span class="top-nav__title">ArcOffice</span>
     </div>
     <div class="top-nav__right">
-      <button
+      <el-button
         class="top-nav__theme-btn"
+        text
+        size="small"
         @click="themeStore.toggle()"
         :title="themeLabel"
       >
-        <el-icon :size="16">
+        <el-icon :size="14">
           <Sunny v-if="themeStore.isDark" />
           <MoonNight v-else />
         </el-icon>
-        <span class="top-nav__theme-label">{{ themeLabel }}</span>
-      </button>
+        <span>{{ themeLabel }}</span>
+      </el-button>
     </div>
   </header>
 </template>
@@ -89,27 +91,7 @@ const themeLabel = computed(() => {
   }
 
   &__theme-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 30px;
-    padding: 0 10px;
-    border: 1px solid var(--arc-border);
-    background: var(--arc-bg-canvas);
-    border-radius: var(--arc-radius-lg);
-    cursor: pointer;
-    color: var(--arc-text-secondary);
-    transition: all 200ms ease;
-
-    &:hover {
-      background: var(--arc-bg-hover);
-      border-color: var(--arc-brand-blue);
-      color: var(--arc-brand-blue);
-    }
-  }
-
-  &__theme-label {
-    @include font-label-sm;
+    // el-button text handles styling; minimal gap for icon+label
   }
 }
 </style>

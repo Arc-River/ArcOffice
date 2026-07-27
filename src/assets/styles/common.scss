@@ -1,0 +1,170 @@
+// ============================================================
+// ArcOffice Common Component Styles
+// Shared patterns extracted across views — use BEM classes
+// directly in templates instead of duplicating per view.
+// ============================================================
+
+// ── Settings Page Layout (used by General / Models / Skills / Mcp) ──
+
+.settings-page {
+  padding: var(--arc-space-lg);
+  max-width: 640px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--arc-space-xs);
+  }
+
+  &__title {
+    @include font-title-lg;
+    color: var(--arc-text-primary);
+
+    // Standalone title (no __header wrapper) still needs spacing below
+    & {
+      margin-bottom: var(--arc-space-md);
+    }
+  }
+
+  // When inside __header, let the header control the margin
+  &__header + &__title {
+    margin-bottom: 0;
+  }
+
+  &__desc {
+    @include font-body-sm;
+    color: var(--arc-text-secondary);
+    margin-bottom: var(--arc-space-md);
+  }
+
+  &__section {
+    // Box styling delegated to per-view card/row styles
+    // to avoid double-border overlap with inner items.
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--arc-space-xxl);
+    gap: var(--arc-space-sm);
+    text-align: center;
+
+    &-text {
+      @include font-title;
+      color: var(--arc-text-primary);
+    }
+
+    &-hint {
+      @include font-body-sm;
+      color: var(--arc-text-placeholder);
+    }
+  }
+}
+
+// ── Toolbar ──
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: var(--arc-space-xs) var(--arc-space-md);
+  border-bottom: 1px solid var(--arc-border);
+  flex-shrink: 0;
+}
+
+// ── Card List Item (file items, model cards, skill cards, etc.) ──
+
+.list-card {
+  display: flex;
+  align-items: center;
+  gap: var(--arc-space-sm);
+  padding: var(--arc-space-xs) var(--arc-space-sm);
+  background: var(--arc-bg-canvas);
+  border: 1px solid var(--arc-border);
+  border-radius: var(--arc-radius-lg);
+
+  &__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--arc-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    @include font-body;
+    font-weight: 500;
+  }
+
+  &__meta {
+    @include font-body-xs;
+    color: var(--arc-text-placeholder);
+  }
+}
+
+// ── Icon Button (small square icon-only button) ──
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: var(--arc-radius-sm);
+  color: var(--arc-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 200ms, background 200ms;
+
+  &:hover {
+    color: var(--arc-brand-blue);
+    background: var(--arc-bg-hover);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+    &:hover {
+      background: transparent;
+      color: var(--arc-text-secondary);
+    }
+  }
+}
+
+// ── Search Bar Pattern ──
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--arc-space-xs);
+  padding: 4px 10px;
+  background: var(--arc-bg-canvas);
+  border: 1px solid var(--arc-border);
+  border-radius: var(--arc-radius-lg);
+  max-width: 260px;
+  flex: 1;
+
+  &__input {
+    border: none;
+    background: transparent;
+    @include font-body-sm;
+    color: var(--arc-text-primary);
+    outline: none;
+    width: 100%;
+
+    &::placeholder {
+      color: var(--arc-text-placeholder);
+    }
+  }
+}

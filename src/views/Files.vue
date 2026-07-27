@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { ArrowRight, DataAnalysis, Document, Film, Folder, FolderOpened, Search } from '@element-plus/icons-vue'
+import {
+  ArrowRight,
+  ArrowUp,
+  ChatLineSquare,
+  DataAnalysis,
+  Document,
+  Film,
+  Folder,
+  FolderOpened,
+  Search,
+} from '@element-plus/icons-vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { formatFileSize, formatSmartDate } from '@/utils/format'
@@ -191,33 +201,35 @@ onMounted(async () => {
     </div>
     <div class="files__main">
       <div class="files__toolbar">
-        <div class="files__search">
-          <el-icon :size="14"><Search /></el-icon>
-          <input
-            class="files__search-input"
-            placeholder="搜索文件…"
-            v-model="searchQuery"
-          />
-        </div>
-        <button class="files__up" title="返回上级" @click="goUp" :disabled="currentPath === workingDir">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M12 19V5M5 12l7-7 7 7" />
-          </svg>
-        </button>
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索文件…"
+          size="small"
+          clearable
+          :prefix-icon="Search"
+          class="files__search"
+        />
+        <el-button
+          class="files__up"
+          :icon="ArrowUp"
+          circle
+          text
+          size="small"
+          title="返回上级"
+          @click="goUp"
+          :disabled="currentPath === workingDir"
+        />
       </div>
 
-      <div class="files__breadcrumb" v-if="breadcrumbs.length > 0">
-        <template v-for="(crumb, idx) in breadcrumbs" :key="crumb.path">
-          <span
-            class="files__breadcrumb-item"
-            :class="{ 'files__breadcrumb-item--active': idx === breadcrumbs.length - 1 }"
+      <el-breadcrumb v-if="breadcrumbs.length > 0" class="files__breadcrumb" separator-icon="ArrowRight">
+        <el-breadcrumb-item v-for="(crumb, idx) in breadcrumbs" :key="crumb.path">
+          <a
+            class="files__breadcrumb-link"
+            :class="{ 'files__breadcrumb-link--active': idx === breadcrumbs.length - 1 }"
             @click="navigateToBreadcrumb(idx)"
-          >{{ crumb.name }}</span>
-          <span v-if="idx < breadcrumbs.length - 1" class="files__breadcrumb-sep">
-            <el-icon :size="12"><ArrowRight /></el-icon>
-          </span>
-        </template>
-      </div>
+          >{{ crumb.name }}</a>
+        </el-breadcrumb-item>
+      </el-breadcrumb>
 
       <div v-if="loading" class="files__empty">
         <p class="files__empty-text">加载中…</p>
@@ -245,9 +257,9 @@ onMounted(async () => {
             <div class="files__item-name">{{ entry.name }}</div>
             <div class="files__item-meta">{{ entry.isDir ? '文件夹' : formatFileSize(entry.size) }} · {{ formatSmartDate(entry.mtime) }}</div>
           </div>
-          <button class="files__item-action" @click.stop="handleFileAction(entry)">
+          <el-button plain @click.stop="handleFileAction(entry)" type="primary" size="small" :icon="entry.isDir ? ArrowRight : ChatLineSquare">
             {{ entry.isDir ? '打开' : '对话' }}
-          </button>
+          </el-button>
         </div>
       </div>
     </div>
@@ -317,74 +329,28 @@ onMounted(async () => {
     justify-content: space-between;
     padding: var(--arc-space-sm) var(--arc-space-md);
     border-bottom: 1px solid var(--arc-border);
+
+    // el-input inside toolbar
+    :deep(.el-input) {
+      max-width: 260px;
+    }
   }
 
   &__search {
-    display: flex;
-    align-items: center;
-    gap: var(--arc-space-xs);
-    padding: 4px 10px;
-    background: var(--arc-bg-canvas);
-    border: 1px solid var(--arc-border);
-    border-radius: var(--arc-radius-lg);
     max-width: 260px;
-    flex: 1;
-  }
-
-  &__search-input {
-    border: none;
-    background: transparent;
-    @include font-body-sm;
-    color: var(--arc-text-primary);
-    outline: none;
-    width: 100%;
-
-    &::placeholder {
-      color: var(--arc-text-placeholder);
-    }
   }
 
   &__up {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border: none;
-    background: transparent;
-    border-radius: var(--arc-radius-sm);
-    color: var(--arc-text-secondary);
-    cursor: pointer;
     flex-shrink: 0;
-
-    &:hover {
-      color: var(--arc-brand-blue);
-      background: var(--arc-bg-hover);
-    }
-
-    &:disabled {
-      opacity: 0.3;
-      cursor: default;
-      &:hover {
-        background: transparent;
-        color: var(--arc-text-secondary);
-      }
-    }
   }
 
   &__breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: 2px;
     padding: var(--arc-space-xs) var(--arc-space-md);
     border-bottom: 1px solid var(--arc-border);
-    @include font-body-sm;
-    flex-wrap: wrap;
 
-    &-item {
+    &-link {
       color: var(--arc-text-secondary);
-      cursor: pointer;
-      padding: 0 2px;
+      text-decoration: none;
 
       &:hover {
         color: var(--arc-brand-blue);
@@ -394,12 +360,6 @@ onMounted(async () => {
         color: var(--arc-text-primary);
         font-weight: 500;
       }
-    }
-
-    &-sep {
-      display: inline-flex;
-      align-items: center;
-      color: var(--arc-text-placeholder);
     }
   }
 
@@ -478,21 +438,6 @@ onMounted(async () => {
       color: var(--arc-text-secondary);
     }
 
-    &-action {
-      @include font-button;
-      height: 28px;
-      padding: 0 12px;
-      border-radius: var(--arc-radius-lg);
-      border: none;
-      background: var(--arc-brand-blue);
-      color: #fff;
-      cursor: pointer;
-      flex-shrink: 0;
-
-      &:hover {
-        opacity: 0.9;
-      }
-    }
   }
 }
 </style>

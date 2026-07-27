@@ -1,4 +1,4 @@
-import type { AiModel, ChatMessage, ChatSession, McpService, PromptTemplate, SkillItem } from '@/types/ai'
+import type { AiModel, ChatMessage, ChatSession, McpService, SkillItem } from '@/types/ai'
 import { IpcError } from '@/types/ipc'
 import type { FileRecord, TaskCreate, TaskRecord } from '@/types/models'
 
@@ -43,9 +43,6 @@ declare global {
       deleteSession: (id: string) => Promise<void>
       getMessages: (sessionId: string) => Promise<{ role: string; content: string }[]>
       saveMessages: (sessionId: string, messages: { role: string; content: string }[]) => Promise<void>
-      // Prompt templates
-      getPrompts: () => Promise<PromptTemplate[]>
-      savePrompts: (prompts: PromptTemplate[]) => Promise<void>
       // Skills
       getSkills: () => Promise<SkillItem[]>
       saveSkills: (skills: SkillItem[]) => Promise<void>
