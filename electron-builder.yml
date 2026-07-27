@@ -12,8 +12,6 @@ files:
   - dist
   - dist-electron
 
-publish: never
-
 mac:
   target: [dmg, zip]
   artifactName: "${productName}-${version}-mac-${arch}.${ext}"

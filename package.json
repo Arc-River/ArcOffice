@@ -22,7 +22,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "electron:dev": "vite",
-    "electron:build": "vite build && electron-builder",
+    "electron:build": "vite build && electron-builder --publish=never",
     "typecheck": "vue-tsc --noEmit",
     "lint": "pnpm lint:biome",
     "lint:ci": "biome ci src/ electron/",
