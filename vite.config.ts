@@ -14,6 +14,9 @@ export default defineConfig({
   define: {
     __ONLYOFFICE_CDN__: JSON.stringify(ONLYOFFICE_CDN),
   },
+  worker: {
+    format: 'es',
+  },
   plugins: [
     vue(),
     AutoImport({
