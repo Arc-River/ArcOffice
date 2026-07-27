@@ -39,6 +39,9 @@ export function setupDevMock() {
     updateTaskProgress: async () => {},
     getTasks: async () => [],
 
+    // 同步聊天（非流式）
+    chatCompletion: async () => '这是 mock 环境的测试回复。如需流式聊天，请使用 chatStream。',
+
     // AI Chat — 默认发送一段含 <thinking> 标签的 Markdown 演示
     chatStream: async () => ({ id: 'mock-stream-1' }),
     onStreamChunk: (() => {
