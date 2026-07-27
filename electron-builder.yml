@@ -8,10 +8,6 @@ asar: true
 asarUnpack:
   - "**/node_modules/@anthropic-ai/**"
 
-files:
-  - dist
-  - dist-electron
-
 mac:
   target: [dmg, zip]
   artifactName: "${productName}-${version}-mac-${arch}.${ext}"
