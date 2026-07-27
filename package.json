@@ -1,6 +1,10 @@
 {
   "name": "ArcOffice",
   "description": "An all-in-one office suite powered by OnlyOffice and AI",
+  "author": {
+    "name": "Arc-River",
+    "email": "arcoffice@users.noreply.github.com"
+  },
   "private": true,
   "version": "0.1.0",
   "type": "module",

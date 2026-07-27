@@ -9,8 +9,10 @@ asarUnpack:
   - "**/node_modules/@anthropic-ai/**"
 
 files:
-  - dist/**/*
-  - dist-electron/**/*
+  - dist
+  - dist-electron
+
+publish: never
 
 mac:
   target: [dmg, zip]
