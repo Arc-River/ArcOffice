@@ -3,6 +3,8 @@ import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
+import OfficeEditor from '@/components/office/OfficeEditor.vue'
+
 const { t } = useI18n()
 const route = useRoute()
 
@@ -23,15 +25,15 @@ watch(
   { immediate: true },
 )
 
-function _handleSave(path: string) {
+function handleSave(path: string) {
   console.log('[OfficeEditorView] saved to:', path)
 }
 
-function _handleError(msg: string) {
+function handleError(msg: string) {
   console.error('[OfficeEditorView] error:', msg)
 }
 
-function _handleReady() {
+function handleReady() {
   console.log('[OfficeEditorView] editor ready')
 }
 </script>

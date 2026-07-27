@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { Document, Download, EditPen, Upload } from '@element-plus/icons-vue'
 import { storeToRefs } from 'pinia'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/stores/theme'
-import { isElectron } from '@/utils/ipc'
+import { getElectronAPI, isElectron } from '@/utils/ipc'
 
 declare const __ONLYOFFICE_CDN__: string
 
@@ -140,7 +141,7 @@ async function loadFileFromDisk(filePath: string) {
 }
 
 /** Open file dialog and load selected file */
-async function _openFile() {
+async function openFile() {
   if (!manager) return
   const api = getElectronAPI()
   if (!api?.openOfficeFileDialog) {
@@ -165,7 +166,7 @@ async function _openFile() {
 }
 
 /** Save the document to disk */
-async function _saveFile() {
+async function saveFile() {
   if (!manager) return
   const api = getElectronAPI()
   if (!api?.saveOfficeFileDialog) {
@@ -187,7 +188,7 @@ async function _saveFile() {
 }
 
 /** Toggle read-only */
-function _toggleReadOnly() {
+function toggleReadOnly() {
   readOnly.value = !readOnly.value
   manager?.setReadOnly(readOnly.value)
 }
@@ -283,7 +284,6 @@ function _toggleReadOnly() {
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  border-bottom: 1px solid var(--arc-border);
   background: var(--arc-bg-soft);
   flex-shrink: 0;
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChatLineSquare, Cpu, FolderOpened, HomeFilled } from '@element-plus/icons-vue'
+import { ChatLineSquare, Cpu, Expand, Fold, FolderOpened, Grid, HomeFilled } from '@element-plus/icons-vue'
 import { type Component, computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'

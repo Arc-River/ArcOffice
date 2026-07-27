@@ -222,6 +222,29 @@ async function testModel(model: AiModel) {
     display: flex;
     gap: var(--arc-space-xs);
     justify-content: flex-end;
+    border-top: none;
+    margin-top: 0;
+    padding-top: var(--arc-space-sm);
+  }
+
+  :deep(.el-collapse) {
+    border-bottom: none;
+  }
+
+  :deep(.el-collapse-item__wrap) {
+    border-bottom: none;
+  }
+
+  :deep(.el-collapse-item__header) {
+    border-bottom: none;
+  }
+
+  :deep(.el-form-item) {
+    margin-bottom: 0;
+  }
+
+  :deep(.el-form) {
+    padding-bottom: 0;
   }
 
   &__section {
