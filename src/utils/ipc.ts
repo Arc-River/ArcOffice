@@ -12,6 +12,8 @@ import type { FileRecord, TaskCreate, TaskRecord } from '@/types/models'
 declare global {
   interface Window {
     electronAPI: {
+      getAppVersion: () => Promise<string>
+      checkUpdate: () => Promise<{ latestVersion: string; releaseUrl: string }>
       listDirectory: (dirPath: string) => Promise<{ name: string; isDir: boolean; size: number; mtime: string }[]>
       readFileText: (filePath: string) => Promise<string>
       getConfig: (key: string) => Promise<string>

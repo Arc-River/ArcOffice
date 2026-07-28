@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useCrudList } from '@/composables/useCrudList'
 import type { SkillItem } from '@/types/ai'
 import { getElectronAPI } from '@/utils/ipc'
+// biome-ignore lint/correctness/noUnusedImports: used in template for icon rendering
 import { getSkillColor, getSkillIcon } from '@/utils/skill-icons'
 
 const api = getElectronAPI()
@@ -25,6 +26,7 @@ const crud = useCrudList<SkillItem>({
   entityName: t('settings.skills.title'),
 })
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 async function saveForm() {
   const name = crud.form.value.name.trim()
   const description = crud.form.value.description.trim()
@@ -41,10 +43,12 @@ async function saveForm() {
   await crud.saveForm()
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 async function handleToggle(skill: SkillItem) {
   await crud.toggleEnabled(skill)
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 async function handleDelete(skill: SkillItem) {
   if (skill.builtin) {
     ElMessage.info(t('settings.skills.builtinNotDeletable'))

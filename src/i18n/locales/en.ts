@@ -14,6 +14,7 @@ export default {
     models: 'Models',
     skills: 'Skills',
     mcp: 'MCP',
+    about: 'About',
   },
   home: {
     title: 'ArcOffice',
@@ -92,6 +93,12 @@ export default {
     edit: 'Edit',
     readOnly: 'Read Only',
     electronRequired: 'File operations require Electron runtime',
+    reload: 'Reload',
+    newFile: {
+      word: 'Word',
+      excel: 'Excel',
+      powerpoint: 'PowerPoint',
+    },
   },
   batch: {
     title: 'Batch Tasks',
@@ -223,6 +230,22 @@ export default {
       save: 'Save',
       validate: 'Please fill in all required fields',
       builtinNotDeletable: 'Built-in skills cannot be deleted. You can disable them in the list.',
+    },
+    about: {
+      appName: 'ArcOffice',
+      title: 'About ArcOffice',
+      version: 'Version',
+      repoLink: 'Repository',
+      license: 'License',
+      checkUpdate: 'Check for Updates',
+      checking: 'Checking...',
+      latest: 'You are up to date!',
+      updateAvailable: 'Update Available',
+      updateConfirm: 'New version {version} is available. Want to download?',
+      download: 'Download',
+      cancel: 'Cancel',
+      checkFailed: 'Unable to check for updates',
+      electronOnly: 'This feature is only available in the desktop app',
     },
   },
   theme: {

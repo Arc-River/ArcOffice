@@ -1,6 +1,10 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  // App info
+  getAppVersion: () => ipcRenderer.invoke('app:getVersion'),
+  checkUpdate: () => ipcRenderer.invoke('app:checkUpdate'),
+
   // File operations
   listDirectory: (dirPath: string) => ipcRenderer.invoke('io:listDirectory', dirPath),
   readFileText: (filePath: string) => ipcRenderer.invoke('io:readFileText', filePath),

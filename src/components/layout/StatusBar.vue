@@ -5,10 +5,20 @@ import { getElectronAPI } from '@/utils/ipc'
 
 const { t } = useI18n()
 
+const appVersion = ref('')
 const activeModel = ref('')
 
 onMounted(async () => {
   const api = getElectronAPI()
+  // Load version
+  if (api) {
+    try {
+      appVersion.value = await api.getAppVersion()
+    } catch {
+      appVersion.value = '0.1.0'
+    }
+  }
+
   if (!api) return
   try {
     const modelId = await api.getActiveModel()
@@ -27,7 +37,7 @@ onMounted(async () => {
 
 <template>
   <footer class="status-bar">
-    <span class="status-bar__item">{{ t('status.version') }}</span>
+    <span class="status-bar__item">ArcOffice v{{ appVersion }}</span>
     <span class="status-bar__item status-bar__item--center">{{ activeModel }}</span>
   </footer>
 </template>

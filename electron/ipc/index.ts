@@ -1,4 +1,5 @@
 import { dialog, ipcMain, type OpenDialogOptions, type SaveDialogOptions } from 'electron'
+import * as app from './app'
 import * as io from './io'
 import * as db from './db'
 import * as ai from './ai'
@@ -29,6 +30,9 @@ async function saveDialog(options: SaveDialogOptions): Promise<string | null> {
 }
 
 export function registerAllHandlers() {
+  // App info
+  registerModule('app', app)
+
   // Auto-register by module prefix
   registerModule('io', io)
 

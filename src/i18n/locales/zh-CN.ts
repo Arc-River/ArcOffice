@@ -14,6 +14,7 @@ export default {
     models: '模型',
     skills: 'Skills',
     mcp: 'MCP',
+    about: '关于',
   },
   home: {
     title: 'ArcOffice',
@@ -92,6 +93,12 @@ export default {
     edit: '编辑',
     readOnly: '只读',
     electronRequired: '文件操作需要 Electron 运行时',
+    reload: '重载',
+    newFile: {
+      word: 'Word',
+      excel: 'Excel',
+      powerpoint: 'PowerPoint',
+    },
   },
   batch: {
     title: '批量任务',
@@ -223,6 +230,22 @@ export default {
       save: '保存',
       validate: '请填写完整信息',
       builtinNotDeletable: '内置技能不可删除，可在列表中关闭',
+    },
+    about: {
+      appName: 'ArcOffice',
+      title: '关于 ArcOffice',
+      version: '版本',
+      repoLink: '源码仓库',
+      license: '开源协议',
+      checkUpdate: '检查更新',
+      checking: '检查中...',
+      latest: '已是最新版本！',
+      updateAvailable: '发现新版本',
+      updateConfirm: '发现新版本 {version}，是否前往下载？',
+      download: '前往下载',
+      cancel: '取消',
+      checkFailed: '检查更新失败，请检查网络连接',
+      electronOnly: '此功能仅在桌面端可用',
     },
   },
   theme: {

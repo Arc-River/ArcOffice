@@ -3,6 +3,7 @@ import { ChatLineSquare, Cpu, Expand, Fold, FolderOpened, Grid, HomeFilled } fro
 import { type Component, computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import IconAbout from '@/components/icons/IconAbout.vue'
 import IconMcp from '@/components/icons/IconMcp.vue'
 import IconOffice from '@/components/icons/IconOffice.vue'
 import IconSettings from '@/components/icons/IconSettings.vue'
@@ -71,6 +72,7 @@ const _configItems = computed<NavItem[]>(() => [
   { label: t('nav.models'), path: '/settings/models', icon: Cpu },
   { label: t('nav.skills'), path: '/settings/skills', icon: IconSkills },
   { label: t('nav.mcp'), path: '/settings/mcp', icon: IconMcp },
+  { label: t('nav.about'), path: '/settings/about', icon: IconAbout },
 ])
 </script>
 

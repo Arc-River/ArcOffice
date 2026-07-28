@@ -11,6 +11,10 @@ export function setupDevMock() {
   console.log('[DevMock] 注入 mock electronAPI（仅在浏览器开发模式）')
 
   window.electronAPI = {
+    // 应用信息
+    getAppVersion: async () => '0.1.0',
+    checkUpdate: async () => ({ latestVersion: '', releaseUrl: '' }),
+
     // 文件操作
     listDirectory: async () => [],
     readFileText: async () => '',

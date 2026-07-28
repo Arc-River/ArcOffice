@@ -60,6 +60,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/settings/Mcp.vue'),
     meta: { title: 'settings.mcp.title' },
   },
+  {
+    path: '/settings/about',
+    name: 'settings-about',
+    component: () => import('@/views/settings/About.vue'),
+    meta: { title: 'settings.about.title' },
+  },
 ]
 
 const router = createRouter({
