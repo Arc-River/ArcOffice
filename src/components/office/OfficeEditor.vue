@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Document, Download, EditPen, Upload } from '@element-plus/icons-vue'
+import { Document, Download, EditPen, Refresh, Upload } from '@element-plus/icons-vue'
 import { storeToRefs } from 'pinia'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -9,6 +9,7 @@ import { getElectronAPI, isElectron } from '@/utils/ipc'
 declare const __ONLYOFFICE_CDN__: string
 
 import { type FileType, OFFICE_THEME, type OfficeThemeId } from '@/components/onlyoffice/const'
+import { FILE_TYPE } from '@/components/onlyoffice/const/index'
 import { OnlyOfficeManager, onlyOfficeManagerFactory } from '@/components/onlyoffice/core/onlyoffice-manager'
 import { setCurrentLang } from '@/components/onlyoffice/store/lang'
 import { getFileTypeConstant, getOnlyOfficeMimeType } from '@/components/onlyoffice/util/document-file'
@@ -42,6 +43,66 @@ const readOnly = ref(false)
 
 let manager: OnlyOfficeManager | null = null
 
+/** 强制重载编辑器：销毁后重新初始化 */
+async function reload() {
+  loading.value = true
+  loadingText.value = t('office.initializing')
+  error.value = null
+  onlyOfficeManagerFactory.destroyAll()
+  manager = null
+  await initEditor()
+}
+
+/** 创建指定类型的新空白文档 */
+async function newDocument(targetType: string) {
+  loading.value = true
+  loadingText.value = t('office.initializing')
+  error.value = null
+  readOnly.value = false
+  onlyOfficeManagerFactory.destroyAll()
+  manager = null
+
+  const extensions: Record<string, string> = {
+    word: 'docx',
+    excel: 'xlsx',
+    powerpoint: 'pptx',
+  }
+  const ext = extensions[targetType] || 'docx'
+  const name = `${t(`office.newFile.${targetType}`)}.${ext}`
+  const fileType = ext === 'xlsx' ? FILE_TYPE.XLSX : ext === 'pptx' ? FILE_TYPE.PPTX : FILE_TYPE.DOCX
+
+  // Re-initialize with blank document info
+  try {
+    OnlyOfficeManager.registerStaticResource({
+      cdnOrigin: __ONLYOFFICE_CDN__,
+    })
+    setCurrentLang(currentOoLang.value)
+
+    loadingText.value = t('office.loadingSdk')
+    await onlyOfficeManagerFactory.open(
+      {
+        containerId: 'iframe-office-id',
+        fileType,
+        defaultFileName: name,
+        readOnly: false,
+        theme: currentTheme.value,
+        lang: currentOoLang.value,
+      },
+      { fileName: name, isNew: true },
+    )
+
+    manager = onlyOfficeManagerFactory.get('iframe-office-id')
+    if (!manager) throw new Error('Failed to create OnlyOffice manager')
+
+    loading.value = false
+    emit('ready')
+  } catch (err) {
+    error.value = String(err)
+    loading.value = false
+    emit('error', String(err))
+  }
+}
+
 // ── Theme sync ──
 const currentTheme = computed<OfficeThemeId>(() => (isDark.value ? OFFICE_THEME.DARK : OFFICE_THEME.WHITE))
 
@@ -72,7 +133,7 @@ function basename(path: string): string {
 }
 
 // ── Init ──
-onMounted(async () => {
+async function initEditor() {
   try {
     // Register CDN for static SDK assets
     OnlyOfficeManager.registerStaticResource({
@@ -116,6 +177,10 @@ onMounted(async () => {
     loading.value = false
     emit('error', String(err))
   }
+}
+
+onMounted(async () => {
+  await initEditor()
 })
 
 onBeforeUnmount(() => {
@@ -237,6 +302,17 @@ function toggleReadOnly() {
         <el-icon><Document /></el-icon>
         {{ fileName || t('office.untitled') }}
       </span>
+      <el-dropdown split-button type="primary" size="small" @click="reload">
+        <el-icon style="margin-right: 4px"><Refresh /></el-icon>
+        {{ t('office.reload') }}
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="newDocument('word')">{{ t('office.newFile.word') }}</el-dropdown-item>
+            <el-dropdown-item @click="newDocument('excel')">{{ t('office.newFile.excel') }}</el-dropdown-item>
+            <el-dropdown-item @click="newDocument('powerpoint')">{{ t('office.newFile.powerpoint') }}</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
 
     <!-- Editor container -->

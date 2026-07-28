@@ -182,20 +182,33 @@ function handleToggleWebSearch() {
 
     <!-- Active capabilities chips -->
     <div class="chat-input__tools" v-if="activeSkills.length > 0">
-      <span class="chat-input__chip chat-input__chip--skill" v-for="s in activeSkills" :key="s.id">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+      <el-tag
+        v-for="s in activeSkills"
+        :key="s.id"
+        size="small"
+        type="success"
+        effect="plain"
+        class="chat-input__skill-tag"
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px">
           <path :d="getSkillIcon(s.name)" />
         </svg>
         {{ s.name }}
-      </span>
+      </el-tag>
     </div>
     <div class="chat-input__tools" v-if="activeMCPDisplay.length > 0 || webSearch">
-      <span class="chat-input__chip" v-for="mcpId in activeMCPDisplay" :key="mcpId">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+      <el-tag
+        v-for="mcpId in activeMCPDisplay"
+        :key="mcpId"
+        size="small"
+        effect="plain"
+        class="chat-input__mcp-tag"
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
         </svg>
         {{ webSearch ? 'Web' : '' }}{{ mcpId }}
-      </span>
+      </el-tag>
     </div>
 
     <!-- Tool buttons row -->
@@ -235,7 +248,6 @@ function handleToggleWebSearch() {
               :class="{ 'chat-input__popover-item--active': g.isActive(s) }"
               @click="g.toggle(s.id)"
             >
-              <span class="chat-input__popover-check">{{ g.isActive(s) ? '✓' : '' }}</span>
               <span class="chat-input__popover-skill-icon" v-if="g.renderIcon" :style="{ color: g.renderColor?.(s) }">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   <path :d="g.renderIcon(s)" />
@@ -243,6 +255,7 @@ function handleToggleWebSearch() {
               </span>
               <span class="chat-input__popover-name">{{ s.name }}</span>
               <span class="chat-input__popover-preview">{{ g.renderPreview(s) }}</span>
+              <span class="chat-input__popover-check">{{ g.isActive(s) ? '✓' : '' }}</span>
             </button>
           </div>
         </el-popover>
@@ -365,6 +378,7 @@ function handleToggleWebSearch() {
     gap: 4px;
     flex-wrap: wrap;
     margin-bottom: 6px;
+    margin-top: 4px;
   }
 
   &__chip {
@@ -377,11 +391,6 @@ function handleToggleWebSearch() {
     border-radius: var(--arc-radius-sm);
     background: var(--arc-bg-soft);
     color: var(--arc-text-secondary);
-
-    &--skill {
-      background: color-mix(in srgb, var(--arc-accent-lime) 30%, transparent);
-      color: #5B6E2D;
-    }
   }
 
   &__chip-name {

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Connection } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import IconMcp from '@/components/icons/IconMcp.vue'
 import { useCrudList } from '@/composables/useCrudList'
 import type { McpService } from '@/types/ai'
 import { getElectronAPI } from '@/utils/ipc'
@@ -97,7 +97,7 @@ function saveForm() {
     </p>
 
     <div v-if="crud.items.value.length === 0" class="settings-page__empty">
-      <el-icon class="settings-page__empty-icon" :size="48" color="var(--arc-text-placeholder)"><Connection /></el-icon>
+      <IconMcp class="settings-page__empty-icon" :width="48" :height="48" style="color: var(--arc-text-placeholder)" />
       <p class="settings-page__empty-text">{{ t('settings.mcp.empty') }}</p>
       <p class="settings-page__empty-hint">{{ t('settings.mcp.emptyHint') }}</p>
     </div>
