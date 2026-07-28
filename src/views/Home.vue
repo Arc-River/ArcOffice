@@ -3,6 +3,9 @@
 import { DataAnalysis, Document, Film } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+defineOptions({ name: 'ViewHome' })
+
 import { useRouter } from 'vue-router'
 
 const router = useRouter()

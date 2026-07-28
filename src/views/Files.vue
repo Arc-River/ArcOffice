@@ -12,6 +12,9 @@ import {
   Search,
 } from '@element-plus/icons-vue'
 import { computed, onMounted, ref } from 'vue'
+
+defineOptions({ name: 'ViewFiles' })
+
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { getElectronAPI } from '@/utils/ipc'

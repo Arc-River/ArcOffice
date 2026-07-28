@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ArrowRight, Operation } from '@element-plus/icons-vue'
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onActivated, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+defineOptions({ name: 'ViewChat' })
+
 import { useRoute, useRouter } from 'vue-router'
 import { useAiChat } from '@/composables/useAiChat'
 import type { FileAttachment, McpService, SkillItem } from '@/types/ai'
@@ -69,10 +72,12 @@ function handleScroll() {
   autoScroll.value = el.scrollHeight - el.scrollTop - el.clientHeight < threshold
 }
 
-onMounted(async () => {
+onActivated(() => {
   loadSessions()
+})
 
-  // 加载 Skills、MCP 服务和 Web Search 配置
+onMounted(async () => {
+  // 加载 Skills、MCP 服务和 Web Search 配置（只需加载一次）
   if (api) {
     try {
       skills.value = await api.getSkills()
