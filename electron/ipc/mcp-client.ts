@@ -85,7 +85,7 @@ class MCPClientConnection extends EventEmitter {
     const initResult = await this.request('initialize', {
       protocolVersion: '2024-11-05',
       capabilities: {},
-      clientInfo: { name: 'ArcOffice', version: '0.1.0' },
+      clientInfo: { name: 'ArcOffice', version: '0.1.1' },
     })
 
     const initResponse = initResult as { protocolVersion?: string }
