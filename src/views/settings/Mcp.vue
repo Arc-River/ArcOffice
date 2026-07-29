@@ -96,11 +96,12 @@ function saveForm() {
       {{ t('settings.mcp.desc') }}
     </p>
 
-    <div v-if="crud.items.value.length === 0" class="settings-page__empty">
-      <IconMcp class="settings-page__empty-icon" :width="48" :height="48" style="color: var(--arc-text-placeholder)" />
-      <p class="settings-page__empty-text">{{ t('settings.mcp.empty') }}</p>
-      <p class="settings-page__empty-hint">{{ t('settings.mcp.emptyHint') }}</p>
-    </div>
+    <el-empty v-if="crud.items.value.length === 0" :description="t('settings.mcp.empty')">
+      <template #image>
+        <IconMcp :width="64" :height="64" style="color: var(--arc-text-placeholder)" />
+      </template>
+      <p>{{ t('settings.mcp.emptyHint') }}</p>
+    </el-empty>
 
     <div v-else class="settings-page__section">
       <div v-for="s in crud.items.value" :key="s.id" class="settings-page__service-card">

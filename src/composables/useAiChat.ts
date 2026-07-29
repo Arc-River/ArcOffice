@@ -214,12 +214,29 @@ export function useAiChat() {
         }
       })
 
-      const finishStream = () => {
+      const finishStream = async () => {
         isStreaming.value = false
         currentStreamId.value = null
         cleanup()
-        // Save messages after stream completes
+        // Save messages immediately — don't block on title generation
         saveCurrentSession()
+        // Generate title for first exchange (fire-and-forget)
+        if (messages.value.length === 2 && api?.generateTitle) {
+          const sid = currentSessionId.value
+          const session = sessions.value.find((s) => s.id === sid)
+          if (session) {
+            api
+              .generateTitle(model, messages.value[0].content, messages.value[1].content)
+              .then((title) => {
+                if (title && session.id === currentSessionId.value) {
+                  renameSession(session.id, title)
+                }
+              })
+              .catch(() => {
+                /* keep auto-generated name */
+              })
+          }
+        }
       }
 
       const removeDone = api.onStreamDone(() => {

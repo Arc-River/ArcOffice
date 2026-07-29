@@ -83,22 +83,24 @@ function _cancelRename() {
         @click="emit('select', s.id)"
       >
         <el-icon class="session-list__item-icon"><ChatDotSquare /></el-icon>
-        <span
-          v-if="editingId !== s.id"
-          class="session-list__item-name"
-          @dblclick.stop="_startRename(s)"
-        >{{ s.name }}</span>
-        <input
-          v-else
-          class="session-list__item-input"
-          v-model="editingName"
-          @click.stop
-          @keydown.enter="_confirmRename"
-          @keydown.escape="_cancelRename"
-          @blur="_confirmRename"
-          :ref="(el) => { if (el) inputRefs[s.id] = el as HTMLInputElement }"
-        />
-        <span class="session-list__item-time">{{ formatRelativeTime(s.updated_at) }}</span>
+        <div class="session-list__item-body">
+          <span
+            v-if="editingId !== s.id"
+            class="session-list__item-name"
+            @dblclick.stop="_startRename(s)"
+          >{{ s.name }}</span>
+          <input
+            v-else
+            class="session-list__item-input"
+            v-model="editingName"
+            @click.stop
+            @keydown.enter="_confirmRename"
+            @keydown.escape="_cancelRename"
+            @blur="_confirmRename"
+            :ref="(el) => { if (el) inputRefs[s.id] = el as HTMLInputElement }"
+          />
+          <span class="session-list__item-time">{{ formatRelativeTime(s.updated_at) }}</span>
+        </div>
         <el-popconfirm
           :title="t('common.confirm') + '?'"
           :confirm-button-text="t('common.delete')"
@@ -119,9 +121,7 @@ function _cancelRename() {
           </template>
         </el-popconfirm>
       </button>
-      <div v-if="sessions.length === 0" class="session-list__empty">
-        {{ t('chat.emptyTitle') }}
-      </div>
+      <el-empty v-if="sessions.length === 0" :description="t('chat.emptyTitle')" :image-size="40" />
     </nav>
   </aside>
 </template>
@@ -163,23 +163,15 @@ function _cancelRename() {
     overflow-y: auto;
   }
 
-  &__empty {
-    @include font-body-sm;
-    color: var(--arc-text-placeholder);
-    text-align: center;
-    padding: var(--arc-space-lg) var(--arc-space-sm);
-  }
-
   &__item {
     @include hoverable;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--arc-space-xs);
     padding: var(--arc-space-xs) var(--arc-space-sm);
     border: none;
     background: transparent;
     border-radius: var(--arc-radius-md);
-    @include font-body-sm;
     color: var(--arc-text-primary);
     text-align: left;
     width: 100%;
@@ -193,21 +185,29 @@ function _cancelRename() {
 
     &-icon {
       flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    &-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
     &-name {
-      flex: 1;
-      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       cursor: text;
+      @include font-body-sm;
+      line-height: 1.4;
     }
 
     &-input {
-      flex: 1;
-      min-width: 0;
-      height: 20px;
+      width: 100%;
+      height: 22px;
       border: 1px solid var(--arc-brand-blue);
       background: var(--arc-bg-canvas);
       border-radius: var(--arc-radius-sm);
@@ -218,16 +218,14 @@ function _cancelRename() {
     }
 
     &-time {
-      flex-shrink: 0;
       @include font-body-xs;
       font-size: 10px;
       color: var(--arc-text-placeholder);
-      min-width: 44px;
-      text-align: right;
     }
 
     &-delete {
       display: none;
+      margin-top: 0;
     }
 
     &:hover &-delete {

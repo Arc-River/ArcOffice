@@ -55,6 +55,77 @@ interface ChatParams {
   capabilities?: ChatCapabilities
 }
 
+// ── Title Generation ──
+
+function truncateSmart(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text
+  // Try to break at a sentence boundary first
+  const truncated = text.slice(0, maxLen)
+  const lastPunct = Math.max(
+    truncated.lastIndexOf('。'),
+    truncated.lastIndexOf('！'),
+    truncated.lastIndexOf('？'),
+    truncated.lastIndexOf('. '),
+    truncated.lastIndexOf('! '),
+    truncated.lastIndexOf('? '),
+    truncated.lastIndexOf('，'),
+    truncated.lastIndexOf(','),
+  )
+  const end = lastPunct > maxLen * 0.5 ? lastPunct + 1 : maxLen
+  return text.slice(0, end).trimEnd() + '…'
+}
+
+export async function generateTitle(
+  _event: Electron.IpcMainInvokeEvent,
+  model: AiModel,
+  firstMessage: string,
+  firstResponse: string,
+): Promise<string> {
+  const userSnippet = firstMessage.slice(0, 400).trim()
+  const responseSnippet = firstResponse.slice(0, 500).trim()
+
+  const titlePrompt = `Generate a short title (<=30 chars) for this conversation. The title MUST capture the user's INTENT or TOPIC — do NOT just repeat the opening words.
+
+User: ${userSnippet}
+Assistant: ${responseSnippet}
+
+Examples:
+- "帮我写一份季度销售报告" → "季度销售报告"
+- "分析这份财务报表并给出建议" → "财务报表分析"
+- "What's the capital of France?" → "France Capital"
+- "请把这篇文章翻译成英文" → "文章翻译"
+- "Help me debug this Python function" → "Debug Python Function"
+
+Title (<=30 chars, same language as conversation):`
+
+  try {
+    const client = getAnthropicClient(model)
+    const result = await client.messages.create({
+      model: model.modelId,
+      max_tokens: 60,
+      temperature: 0.5,
+      system: 'You are a title generator. Output ONLY the title — no quotes, no punctuation, no prefix, no explanation.',
+      messages: [{ role: 'user', content: titlePrompt }],
+    })
+    const content = result.content
+      .filter((b) => b.type === 'text')
+      .map((b) => b.text)
+      .join('')
+      .trim()
+    if (content && content.length >= 2 && content.length <= 30) {
+      return content
+    }
+    // If AI returned something reasonable but longer, truncate smartly
+    if (content && content.length > 30) {
+      return truncateSmart(content, 30)
+    }
+    // Fallback to smart truncation of user message
+    return truncateSmart(firstMessage, 24)
+  } catch {
+    return truncateSmart(firstMessage, 24)
+  }
+}
+
 // ── Path Safety ──
 
 let cachedWorkingDir: string | null = null
@@ -627,6 +698,8 @@ When the user makes a request:
 - If editing fails, use read_file first to confirm current content
 - Always use absolute paths for file operations
 - run_command cannot run interactive commands (vim, top, etc.)
+- File operations are restricted to the configured working directory. All read/write/edit/list_directory
+  operations outside of this directory will be denied.
 
 # Response Format
 

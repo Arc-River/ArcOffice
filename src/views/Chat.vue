@@ -76,6 +76,31 @@ onActivated(() => {
   loadSessions()
 })
 
+/** 从文件页面通过 ?file=/path 跳转过来时，创建新会话并自动发送文件处理请求 */
+async function handleFileParam(filePath: string) {
+  if (!api) return
+  router.replace({ query: {} })
+  // 清空当前会话，让 sendMessage 自动创建新会话
+  if (currentSessionId.value) {
+    await switchSession(null)
+  }
+  const fileName = filePath.split(/[/\\]/).pop() || filePath
+  let content = ''
+  try {
+    content = await api.readFileText(filePath)
+  } catch {
+    // binary or unreadable file
+  }
+  await sendMessage(t('chat.sendWithFile', { name: fileName }), undefined, [
+    {
+      name: fileName,
+      path: filePath,
+      content,
+      size: content.length,
+    },
+  ])
+}
+
 onMounted(async () => {
   // 加载 Skills、MCP 服务和 Web Search 配置（只需加载一次）
   if (api) {
@@ -99,30 +124,18 @@ onMounted(async () => {
       /* ignore */
     }
   }
-
-  // 从文件页面通过 ?file=/path 跳转过来时，自动发送文件处理请求
-  const filePath = route.query.file as string | undefined
-  if (filePath && api) {
-    router.replace({ query: {} })
-    const fileName = filePath.split(/[/\\]/).pop() || filePath
-    let content = ''
-    try {
-      content = await api.readFileText(filePath)
-    } catch {
-      // binary or unreadable file
-    }
-    nextTick(() => {
-      sendMessage(t('chat.sendWithFile', { name: fileName }), undefined, [
-        {
-          name: fileName,
-          path: filePath,
-          content,
-          size: content.length,
-        },
-      ])
-    })
-  }
 })
+
+// 监听 ?file= 参数，首次和后续路由变化都触发
+watch(
+  () => route.query.file,
+  async (file) => {
+    if (file && typeof file === 'string') {
+      await handleFileParam(file)
+    }
+  },
+  { immediate: true },
+)
 
 async function handleSend(text: string) {
   if (!text.trim() && attachments.value.length === 0) return
@@ -217,15 +230,9 @@ function handleNewSession() {
       </div>
       <div class="chat__messages" ref="messagesEl" @scroll="handleScroll">
         <template v-if="messages.length === 0">
-          <div class="chat__empty">
-            <div class="chat__empty-icon">
-              <img src="/logo.svg" alt="ArcOffice" width="48" height="48" />
-            </div>
-            <p class="chat__empty-text">{{ t('chat.emptyTitle') }}</p>
-            <p class="chat__empty-hint">
-              {{ isStreaming ? t('chat.streaming') : t('chat.emptyHint') }}
-            </p>
-          </div>
+          <el-empty :description="t('chat.emptyTitle')">
+            <p>{{ isStreaming ? t('chat.streaming') : t('chat.emptyHint') }}</p>
+          </el-empty>
         </template>
         <ChatMessage
           v-for="(msg, index) in messages"
@@ -304,31 +311,6 @@ function handleNewSession() {
     display: flex;
     flex-direction: column;
     gap: var(--arc-space-xs);
-  }
-
-  &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    gap: var(--arc-space-sm);
-    text-align: center;
-  }
-
-  &__empty-icon {
-    margin-bottom: var(--arc-space-xs);
-    opacity: 0.6;
-  }
-
-  &__empty-text {
-    @include font-title;
-    color: var(--arc-text-primary);
-  }
-
-  &__empty-hint {
-    @include font-body-sm;
-    color: var(--arc-text-placeholder);
   }
 
   // 回到底部按钮

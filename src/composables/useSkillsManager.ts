@@ -10,6 +10,7 @@ export function useSkillsManager() {
 
   const items = ref<SkillItem[]>([])
   const loading = ref(false)
+  const skillsDirPath = ref('')
 
   /** Dialog state for skill form (create/edit SKILL.md) */
   const showFormDialog = ref(false)
@@ -71,13 +72,21 @@ export function useSkillsManager() {
 
   // ── SKILL.md form ──
 
-  function openNewForm() {
+  async function openNewForm() {
+    if (!api) return
+    if (!skillsDirPath.value) {
+      skillsDirPath.value = await api.getSkillsDirPath()
+    }
     editingSkill.value = null
     form.value = { name: '', description: '', content: '' }
     showFormDialog.value = true
   }
 
-  function openEditForm(skill: SkillItem) {
+  async function openEditForm(skill: SkillItem) {
+    if (!api) return
+    if (!skillsDirPath.value) {
+      skillsDirPath.value = await api.getSkillsDirPath()
+    }
     editingSkill.value = skill.name
     form.value = {
       name: skill.name,
@@ -183,6 +192,7 @@ export function useSkillsManager() {
     showFileEditor,
     editingFilePath,
     editingFileContent,
+    skillsDirPath,
     load,
     toggle,
     remove,

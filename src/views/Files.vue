@@ -8,6 +8,7 @@ import {
   Film,
   Folder,
   FolderOpened,
+  HomeFilled,
   Pointer,
   Search,
 } from '@element-plus/icons-vue'
@@ -17,30 +18,10 @@ defineOptions({ name: 'ViewFiles' })
 
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { formatFileSize, formatSmartDate } from '@/utils/format'
 import { getElectronAPI } from '@/utils/ipc'
 
 const { t } = useI18n()
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-function formatSmartDate(dateStr: string): string {
-  const now = Date.now()
-  const date = new Date(dateStr).getTime()
-  const diff = now - date
-  const minutes = Math.floor(diff / 60_000)
-  const hours = Math.floor(diff / 3_600_000)
-  const days = Math.floor(diff / 86_400_000)
-
-  if (minutes < 1) return t('time.justNow')
-  if (minutes < 60) return t('time.minutesAgo', { n: minutes })
-  if (hours < 24) return t('time.hoursAgo', { n: hours })
-  if (days < 7) return t('time.daysAgo', { n: days })
-  return new Date(dateStr).toLocaleDateString()
-}
 
 const api = getElectronAPI()
 const router = useRouter()
@@ -169,6 +150,7 @@ async function loadDirectory(dirPath: string) {
 }
 
 function navigateToDir(dirPath: string) {
+  if (dirPath === currentPath.value) return
   loadDirectory(dirPath)
 }
 
@@ -228,27 +210,28 @@ onMounted(async () => {
     </div>
     <div class="files__main">
       <div class="files__toolbar">
-        <el-input
-          v-model="searchQuery"
-          :placeholder="t('files.searchPlaceholder')"
-          size="small"
-          clearable
-          :prefix-icon="Search"
-          class="files__search"
-        />
-        <el-button
-          class="files__up"
-          :icon="ArrowUp"
-          circle
-          text
-          size="small"
-          :title="t('files.goUp')"
-          @click="goUp"
-          :disabled="currentPath === workingDir"
-        />
+        <div class="files__left-group">
+          <el-button
+            :icon="HomeFilled"
+            circle
+            plain
+            size="small"
+            :title="t('files.goHome')"
+            @click="navigateToDir(workingDir)"
+          />
+          <el-input
+            v-model="searchQuery"
+            :placeholder="t('files.searchPlaceholder')"
+            size="small"
+            clearable
+            :prefix-icon="Search"
+            class="files__search"
+          />
+        </div>
       </div>
 
-      <el-breadcrumb v-if="breadcrumbs.length > 0" class="files__breadcrumb" :separator-icon="ArrowRight">
+      <div v-if="breadcrumbs.length > 0" class="files__path-row">
+        <el-breadcrumb class="files__breadcrumb" :separator-icon="ArrowRight">
         <el-breadcrumb-item v-for="(crumb, idx) in breadcrumbs" :key="crumb.path">
           <a
             class="files__breadcrumb-link"
@@ -257,18 +240,24 @@ onMounted(async () => {
           >{{ crumb.name }}</a>
         </el-breadcrumb-item>
       </el-breadcrumb>
+      <el-button
+        :icon="ArrowUp"
+        circle
+        text
+        size="small"
+        :title="t('files.goUp')"
+        @click="goUp"
+        :disabled="currentPath === workingDir"
+      />
+      </div>
 
-      <div v-if="loading" class="files__empty">
-        <p class="files__empty-text">{{ t('files.loading') }}</p>
-      </div>
-      <div v-else-if="error" class="files__empty">
-        <el-icon class="files__empty-icon" :size="48" color="var(--arc-danger)"><FolderOpened /></el-icon>
-        <p class="files__empty-text">{{ error }}</p>
-      </div>
-      <div v-else-if="filteredEntries.length === 0" class="files__empty">
-        <el-icon class="files__empty-icon" :size="48" color="var(--arc-text-placeholder)"><FolderOpened /></el-icon>
-        <p class="files__empty-text">{{ searchQuery ? t('files.noMatch') : t('files.emptyFolder') }}</p>
-      </div>
+      <el-empty v-if="loading" :description="t('files.loading')" />
+      <el-empty v-else-if="error" :description="error">
+        <template #image>
+          <el-icon :size="48" color="var(--arc-danger)"><FolderOpened /></el-icon>
+        </template>
+      </el-empty>
+      <el-empty v-else-if="filteredEntries.length === 0" :description="searchQuery ? t('files.noMatch') : t('files.emptyFolder')" />
       <div v-else class="files__list">
         <div
           v-for="entry in filteredEntries"
@@ -363,17 +352,26 @@ onMounted(async () => {
     }
   }
 
+  &__left-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   &__search {
     max-width: 260px;
   }
 
-  &__up {
-    flex-shrink: 0;
+  &__path-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--arc-space-xs) var(--arc-space-sm) var(--arc-space-xs) var(--arc-space-xs);
+    border-bottom: 1px solid var(--arc-border);
   }
 
   &__breadcrumb {
-    padding: var(--arc-space-xs) var(--arc-space-md);
-    border-bottom: 1px solid var(--arc-border);
+    @include font-body-sm;
 
     &-link {
       color: var(--arc-text-secondary);
@@ -388,29 +386,6 @@ onMounted(async () => {
         font-weight: 500;
       }
     }
-  }
-
-  &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    gap: var(--arc-space-sm);
-  }
-
-  &__empty-icon {
-    margin-bottom: var(--arc-space-xs);
-  }
-
-  &__empty-text {
-    @include font-title;
-    color: var(--arc-text-primary);
-  }
-
-  &__empty-hint {
-    @include font-body-sm;
-    color: var(--arc-text-placeholder);
   }
 
   &__list {

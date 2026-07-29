@@ -22,6 +22,7 @@ declare global {
     electronAPI: {
       getAppVersion: () => Promise<string>
       checkUpdate: () => Promise<{ latestVersion: string; releaseUrl: string }>
+      openDirectory: (dirPath: string) => Promise<void>
       listDirectory: (dirPath: string) => Promise<{ name: string; isDir: boolean; size: number; mtime: string }[]>
       readFileText: (filePath: string) => Promise<string>
       getConfig: (key: string) => Promise<string>
@@ -54,6 +55,7 @@ declare global {
       getActiveModel: () => Promise<string>
       setActiveModel: (modelId: string) => Promise<void>
       testConnection: (model: AiModel) => Promise<{ success: boolean; message: string }>
+      generateTitle: (model: AiModel, firstMessage: string, firstResponse: string) => Promise<string>
       // Sessions
       listSessions: () => Promise<ChatSession[]>
       createSession: (name: string) => Promise<ChatSession>
@@ -63,6 +65,7 @@ declare global {
       saveMessages: (sessionId: string, messages: { role: string; content: string }[]) => Promise<void>
       // Skills — file-system-based
       getSkills: () => Promise<SkillItem[]>
+      getSkillsDirPath: () => Promise<string>
       getSkillDetail: (name: string) => Promise<{ skill: SkillItem | null; files: SkillFileEntry[] }>
       saveSkill: (data: { name: string; description: string; content: string }) => Promise<void>
       deleteSkill: (name: string) => Promise<void>

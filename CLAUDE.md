@@ -65,6 +65,8 @@ src/
     dev-mock.ts    ← Mock electronAPI for browser-only dev (no Electron)
     markstream.ts  ← markstream-vue feature initialization
   builtin-skills/  ← AI skill definitions (docx, xlsx, pdf, pptx)
+                       sourced from `document-skills@anthropic-agent-skills`
+                       (github: anthropics/skills), vendored on first setup
 
 public/
   packages/        ← OnlyOffice SDK assets (downloaded on demand, gitignored)

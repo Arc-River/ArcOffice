@@ -43,10 +43,9 @@ onMounted(async () => {
       <h2 class="batch-task__title">{{ t('batch.title') }}</h2>
     </div>
 
-    <div v-if="tasks.length === 0" class="batch-task__empty">
-      <p class="batch-task__text">{{ t('batch.empty') }}</p>
-      <p class="batch-task__hint">{{ t('batch.emptyHint') }}</p>
-    </div>
+    <el-empty v-if="tasks.length === 0" :description="t('batch.empty')">
+      <p>{{ t('batch.emptyHint') }}</p>
+    </el-empty>
 
     <div v-else class="batch-task__list">
       <div v-for="task in tasks" :key="task.id" class="task-card">
@@ -87,26 +86,6 @@ onMounted(async () => {
   &__title {
     @include font-title-lg;
     color: var(--arc-text-primary);
-  }
-
-  &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    gap: var(--arc-space-sm);
-    text-align: center;
-  }
-
-  &__text {
-    @include font-title;
-    color: var(--arc-text-primary);
-  }
-
-  &__hint {
-    @include font-body-sm;
-    color: var(--arc-text-placeholder);
   }
 
   &__list {

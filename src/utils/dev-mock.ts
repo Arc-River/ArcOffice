@@ -14,6 +14,7 @@ export function setupDevMock() {
     // 应用信息
     getAppVersion: async () => '0.1.0',
     checkUpdate: async () => ({ latestVersion: '', releaseUrl: '' }),
+    openDirectory: async () => {},
 
     // 文件操作
     listDirectory: async () => [],
@@ -112,6 +113,7 @@ export function setupDevMock() {
     getActiveModel: async () => 'mock-model',
     setActiveModel: async () => {},
     testConnection: async () => ({ success: false, message: 'mock 环境无法测试连接' }),
+    generateTitle: async () => 'Mock Chat Session',
 
     // 会话
     listSessions: async () => [],
@@ -173,6 +175,7 @@ export function setupDevMock() {
         fileCount: 3,
       },
     ],
+    getSkillsDirPath: async () => '/mock/path/skills',
     getSkillDetail: async () => ({ skill: null, files: [] }),
     saveSkill: async () => {},
     deleteSkill: async () => {},

@@ -34,6 +34,10 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
+# — Python（技能脚本运行时生成） —
+__pycache__/
+*.pyc
+
 # — 自动生成的类型引用 —
 src/auto-imports.d.ts
 src/components.d.ts

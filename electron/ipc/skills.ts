@@ -412,6 +412,10 @@ export async function deleteSkillFile(
   fs.unlinkSync(filePath)
 }
 
+export async function getSkillsDirPath(): Promise<string> {
+  return getUserSkillsDir()
+}
+
 export async function runScript(
   _event?: Electron.IpcMainInvokeEvent,
   name: string,

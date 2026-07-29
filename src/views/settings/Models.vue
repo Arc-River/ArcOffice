@@ -139,10 +139,9 @@ async function testModel(model: AiModel) {
     </div>
 
     <!-- Model List -->
-    <div v-if="crud.items.value.length === 0 && !crud.showDialog.value" class="settings-page__empty">
-      <p class="settings-page__empty-text">{{ t('settings.models.empty') }}</p>
-      <p class="settings-page__empty-hint">{{ t('settings.models.emptyHint') }}</p>
-    </div>
+    <el-empty v-if="crud.items.value.length === 0 && !crud.showDialog.value" :description="t('settings.models.empty')">
+      <p style="color: var(--arc-text-placeholder); font-size: 13px;">{{ t('settings.models.emptyHint') }}</p>
+    </el-empty>
     <div v-else class="settings-page__section">
       <div v-for="m in crud.items.value" :key="m.id" class="settings-page__model-card">
         <div

@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // App info
   getAppVersion: () => ipcRenderer.invoke('app:getVersion'),
   checkUpdate: () => ipcRenderer.invoke('app:checkUpdate'),
+  openDirectory: (dirPath: string) => ipcRenderer.invoke('app:openDirectory', dirPath),
 
   // File operations
   listDirectory: (dirPath: string) => ipcRenderer.invoke('io:listDirectory', dirPath),
@@ -56,6 +57,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getActiveModel: () => ipcRenderer.invoke('db:getActiveModel'),
   setActiveModel: (modelId: string) => ipcRenderer.invoke('db:setActiveModel', modelId),
   testConnection: (model: unknown) => ipcRenderer.invoke('ai:testConnection', model),
+  generateTitle: (model: unknown, firstMessage: string, firstResponse: string) =>
+    ipcRenderer.invoke('ai:generateTitle', model, firstMessage, firstResponse),
 
   // Sessions
   listSessions: () => ipcRenderer.invoke('sessions:listSessions'),
@@ -67,6 +70,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Skills — file-system-based
   getSkills: () => ipcRenderer.invoke('skills:getSkills'),
+  getSkillsDirPath: () => ipcRenderer.invoke('skills:getSkillsDirPath'),
   getSkillDetail: (name: string) => ipcRenderer.invoke('skills:getSkillDetail', name),
   saveSkill: (data: { name: string; description: string; content: string }) =>
     ipcRenderer.invoke('skills:saveSkill', data),

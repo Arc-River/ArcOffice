@@ -56,6 +56,7 @@ export function registerAllHandlers() {
   // (ai:chat → chatStream, ai:testConnection → testConnection)
   ipcMain.handle('ai:chat', ai.chatStream)
   ipcMain.handle('ai:testConnection', ai.testConnection)
+  ipcMain.handle('ai:generateTitle', ai.generateTitle)
 
   // File dialogs
   ipcMain.handle('dialog:openFile', () =>

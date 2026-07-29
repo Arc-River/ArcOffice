@@ -2,9 +2,11 @@
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSkillsManager } from '@/composables/useSkillsManager'
+import { getElectronAPI } from '@/utils/ipc'
 import { getSkillColor, getSkillIcon } from '@/utils/skill-icons'
 
 const { t } = useI18n()
+const api = getElectronAPI()
 const mgr = useSkillsManager()
 
 onMounted(() => mgr.load())
@@ -28,13 +30,8 @@ function getFileIcon(entry: { name: string; isDirectory: boolean }): string {
     </div>
     <p class="settings-page__desc">{{ t('settings.skills.desc') }}</p>
 
-    <div v-if="mgr.loading.value" class="settings-page__empty">
-      <p>{{ t('common.loading') }}</p>
-    </div>
-
-    <div v-else-if="mgr.items.value.length === 0" class="settings-page__empty">
-      <p>{{ t('settings.skills.empty') }}</p>
-    </div>
+    <el-empty v-if="mgr.loading.value" :description="t('common.loading')" />
+    <el-empty v-else-if="mgr.items.value.length === 0" :description="t('settings.skills.empty')" />
 
     <div v-else class="settings-page__section">
       <div v-for="s in mgr.items.value" :key="s.name" class="settings-page__skill-card">
@@ -110,18 +107,18 @@ function getFileIcon(entry: { name: string; isDirectory: boolean }): string {
             :placeholder="t('settings.skills.descPlaceholder')"
           />
         </el-form-item>
-        <el-form-item :label="t('settings.skills.instructions')">
-          <div class="settings-page__content-hint">{{ t('settings.skills.instructionsDesc') }}</div>
-          <el-input
-            v-model="mgr.form.value.content"
-            type="textarea"
-            :rows="8"
-            :placeholder="t('settings.skills.instructionsPlaceholder')"
-            maxlength="10000"
-            show-word-limit
-          />
-        </el-form-item>
       </el-form>
+      <div class="settings-page__folder-hint" v-if="mgr.skillsDirPath.value">
+        <span
+          class="settings-page__folder-path"
+          :title="mgr.skillsDirPath.value + '/' + (mgr.form.value.name || '')"
+          @click="api?.openDirectory(mgr.skillsDirPath.value + '/' + (mgr.form.value.name || ''))"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+          <code>{{ mgr.form.value.name || 'skills' }}</code>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+        </span>
+      </div>
       <template #footer>
         <el-button @click="mgr.cancelForm()">{{ t('settings.skills.cancel') }}</el-button>
         <el-button type="primary" @click="mgr.saveForm()">{{ t('settings.skills.save') }}</el-button>
@@ -135,9 +132,7 @@ function getFileIcon(entry: { name: string; isDirectory: boolean }): string {
       width="600px"
       :close-on-click-modal="false"
     >
-      <div v-if="mgr.files.value.length === 0" class="settings-page__empty">
-        <p>{{ t('settings.skills.noFiles') }}</p>
-      </div>
+      <el-empty v-if="mgr.files.value.length === 0" :description="t('settings.skills.noFiles')" />
       <div v-else class="settings-page__file-list">
         <div
           v-for="f in mgr.files.value"
@@ -201,19 +196,45 @@ function getFileIcon(entry: { name: string; isDirectory: boolean }): string {
   // Using shared .settings-page from common.scss
   // Only view-specific styles below
 
-  &__empty {
-    @include font-body-sm;
-    color: var(--arc-text-placeholder);
-    text-align: center;
-    padding: var(--arc-space-xl) var(--arc-space-sm);
-    border: 1px dashed var(--arc-border);
-    border-radius: var(--arc-radius-lg);
-  }
-
   &__section {
     display: flex;
     flex-direction: column;
     gap: 6px;
+  }
+
+  &__folder-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: var(--arc-space-xs) var(--arc-space-sm);
+    margin: 0 var(--arc-space-sm) var(--arc-space-xs);
+    background: var(--arc-bg-soft);
+    border-radius: var(--arc-radius-md);
+    @include font-body-xs;
+    color: var(--arc-text-secondary);
+    line-height: 1.5;
+  }
+
+  &__folder-path {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    color: var(--arc-brand-blue);
+    text-decoration: none;
+    border-radius: var(--arc-radius-sm);
+    padding: 1px 4px;
+    transition: background 150ms ease;
+
+    &:hover {
+      background: var(--arc-bg-hover);
+      text-decoration: underline;
+    }
+
+    code {
+      font-size: inherit;
+      color: var(--arc-brand-blue);
+    }
   }
 
   &__skill-card {
@@ -260,13 +281,6 @@ function getFileIcon(entry: { name: string; isDirectory: boolean }): string {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-  }
-
-  &__content-hint {
-    @include font-body-xs;
-    color: var(--arc-text-placeholder);
-    margin-bottom: 6px;
-    line-height: 1.5;
   }
 
   &__more {

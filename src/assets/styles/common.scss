@@ -38,29 +38,27 @@
     margin-bottom: var(--arc-space-md);
   }
 
-  &__section {
-    // Box styling delegated to per-view card/row styles
-    // to avoid double-border overlap with inner items.
+
+
+}
+
+// ── Empty State ──
+
+.el-empty {
+  padding: var(--arc-space-lg) 0;
+
+  .el-empty__image {
+    width: 80px;
+    height: 80px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
   }
 
-  &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--arc-space-xxl);
-    gap: var(--arc-space-sm);
-    text-align: center;
-
-    &-text {
-      @include font-title;
-      color: var(--arc-text-primary);
-    }
-
-    &-hint {
-      @include font-body-sm;
-      color: var(--arc-text-placeholder);
-    }
+  .el-empty__description {
+    margin-top: var(--arc-space-xs);
   }
 }
 

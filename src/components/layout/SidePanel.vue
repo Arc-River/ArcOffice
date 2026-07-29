@@ -232,6 +232,7 @@ const _configItems = computed<NavItem[]>(() => [
 
   &__item {
     @include hoverable;
+    position: relative;
     display: flex;
     align-items: center;
     gap: var(--arc-space-xs);
@@ -246,8 +247,20 @@ const _configItems = computed<NavItem[]>(() => [
 
     &--active {
       color: var(--arc-brand-blue);
-      font-weight: 500;
-      background: var(--arc-bg-hover);
+      font-weight: 600;
+      background: var(--arc-bg-active);
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 2px;
+        bottom: 2px;
+        width: 4px;
+        border-radius: 4px 0 0 4px;
+        background: linear-gradient(180deg, var(--arc-brand-blue), color-mix(in srgb, var(--arc-brand-blue) 70%, #fff));
+        box-shadow: 1px 0 6px rgba(22, 119, 255, 0.3);
+      }
     }
 
     &--disabled {

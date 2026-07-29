@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { app, shell } from 'electron'
 
 export async function getVersion() {
   return app.getVersion()
@@ -21,4 +21,11 @@ export async function checkUpdate(): Promise<{ latestVersion: string; releaseUrl
   } catch {
     return { latestVersion: '', releaseUrl: '' }
   }
+}
+
+export async function openDirectory(
+  _event: Electron.IpcMainInvokeEvent,
+  dirPath: string,
+): Promise<void> {
+  await shell.openPath(dirPath)
 }
