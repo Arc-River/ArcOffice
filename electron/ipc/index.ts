@@ -4,6 +4,7 @@ import * as io from './io'
 import * as db from './db'
 import * as ai from './ai'
 import * as sessions from './sessions'
+import * as skills from './skills'
 
 /**
  * Auto-register all function exports from a module under a given IPC prefix.
@@ -38,6 +39,9 @@ export function registerAllHandlers() {
 
   // Sessions use their own prefix
   registerModule('sessions', sessions)
+
+  // Skills — file-system-based skill management
+  registerModule('skills', skills)
 
   // Database — skip internal helpers (queryRow, queryAll) that aren't IPC handlers
   // and only register public-facing handlers

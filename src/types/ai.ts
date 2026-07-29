@@ -45,19 +45,27 @@ export interface McpService {
 // ── Skill Item ──
 
 export interface SkillItem {
-  id: string
   name: string
   description: string
   content?: string
   builtin?: boolean
   enabled: boolean
   created_at: string
+  hasScripts?: boolean
+  fileCount?: number
+}
+
+export interface SkillFileEntry {
+  name: string
+  path: string
+  isDirectory: boolean
+  size: number
 }
 
 // ── Chat Capabilities (工具/技能/搜索等在会话中的激活状态) ──
 
 export interface ChatCapabilities {
-  /** 用户选中的 Skill ID 列表，其 content 会注入到 system prompt */
+  /** 用户选中的 Skill name 列表，其 content 会注入到 system prompt */
   activeSkillIds: string[]
   /** 用户选中的 MCP Service ID 列表（预留） */
   activeMcpServiceIds: string[]

@@ -126,10 +126,9 @@ export function setupDevMock() {
     getMessages: async () => [],
     saveMessages: async () => {},
 
-    // Skills
+    // Skills — file-system-based
     getSkills: async () => [
       {
-        id: 'docx',
         name: 'docx',
         description: 'Word 文档创建与编辑：使用 docx（npm）包创建新文档，或解压/编辑 XML 修改现有文档',
         content:
@@ -137,9 +136,10 @@ export function setupDevMock() {
         builtin: true,
         enabled: true,
         created_at: new Date().toISOString(),
+        hasScripts: true,
+        fileCount: 3,
       },
       {
-        id: 'xlsx',
         name: 'xlsx',
         description: 'Excel 电子表格处理：使用 openpyxl 创建/编辑 xlsx 文件，支持公式和格式',
         content:
@@ -147,9 +147,10 @@ export function setupDevMock() {
         builtin: true,
         enabled: true,
         created_at: new Date().toISOString(),
+        hasScripts: true,
+        fileCount: 3,
       },
       {
-        id: 'pdf',
         name: 'pdf',
         description: 'PDF 文件处理：提取文本/表格、合并、拆分、创建 PDF',
         content:
@@ -157,9 +158,10 @@ export function setupDevMock() {
         builtin: true,
         enabled: true,
         created_at: new Date().toISOString(),
+        hasScripts: true,
+        fileCount: 5,
       },
       {
-        id: 'pptx',
         name: 'pptx',
         content:
           '使用 pptxgenjs（npm）创建演示文稿。使用 LAYOUT_16x9（10" x 5.625"）。颜色不要 # 前缀。图表需要完整的轴线声明。验证始终是强制性的。',
@@ -167,9 +169,18 @@ export function setupDevMock() {
         builtin: true,
         enabled: true,
         created_at: new Date().toISOString(),
+        hasScripts: true,
+        fileCount: 3,
       },
     ],
-    saveSkills: async () => {},
+    getSkillDetail: async () => ({ skill: null, files: [] }),
+    saveSkill: async () => {},
+    deleteSkill: async () => {},
+    toggleSkill: async () => {},
+    getSkillFiles: async () => [],
+    readSkillFile: async () => '',
+    writeSkillFile: async () => {},
+    deleteSkillFile: async () => {},
 
     // MCP
     getMcpServices: async () => [

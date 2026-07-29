@@ -1,4 +1,12 @@
-import type { AiModel, ChatCapabilities, ChatMessage, ChatSession, McpService, SkillItem } from '@/types/ai'
+import type {
+  AiModel,
+  ChatCapabilities,
+  ChatMessage,
+  ChatSession,
+  McpService,
+  SkillFileEntry,
+  SkillItem,
+} from '@/types/ai'
 import { IpcError } from '@/types/ipc'
 import type { FileRecord, TaskCreate, TaskRecord } from '@/types/models'
 
@@ -53,9 +61,16 @@ declare global {
       deleteSession: (id: string) => Promise<void>
       getMessages: (sessionId: string) => Promise<{ role: string; content: string }[]>
       saveMessages: (sessionId: string, messages: { role: string; content: string }[]) => Promise<void>
-      // Skills
+      // Skills — file-system-based
       getSkills: () => Promise<SkillItem[]>
-      saveSkills: (skills: SkillItem[]) => Promise<void>
+      getSkillDetail: (name: string) => Promise<{ skill: SkillItem | null; files: SkillFileEntry[] }>
+      saveSkill: (data: { name: string; description: string; content: string }) => Promise<void>
+      deleteSkill: (name: string) => Promise<void>
+      toggleSkill: (name: string, enabled: boolean) => Promise<void>
+      getSkillFiles: (name: string) => Promise<SkillFileEntry[]>
+      readSkillFile: (name: string, relativePath: string) => Promise<string>
+      writeSkillFile: (name: string, relativePath: string, content: string) => Promise<void>
+      deleteSkillFile: (name: string, relativePath: string) => Promise<void>
       // MCP services
       getMcpServices: () => Promise<McpService[]>
       saveMcpServices: (services: McpService[]) => Promise<void>

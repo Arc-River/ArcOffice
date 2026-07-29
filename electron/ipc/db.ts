@@ -81,9 +81,6 @@ export async function getDb(): Promise<Database> {
   // Save initial schema to disk
   persistDb()
 
-  // Seed built-in skills on first run (idempotent)
-  await seedBuiltinSkills()
-
   return db
 }
 
@@ -154,94 +151,6 @@ async function setJsonConfig(key: string, value: unknown): Promise<void> {
  * Parse simple YAML frontmatter from a Markdown file.
  * Returns { name, description, body }.
  */
-function parseSkillMd(filePath: string): { name: string; description: string; body: string } | null {
-  try {
-    const raw = fs.readFileSync(filePath, 'utf-8')
-    const match = raw.match(/^---\n([\s\S]+?)\n---\n([\s\S]*)$/)
-    if (!match) return null
-
-    const frontmatter: Record<string, string> = {}
-    for (const line of match[1].split('\n')) {
-      const kv = line.match(/^(\w+):\s*(.+)$/)
-      if (kv) frontmatter[kv[1]] = kv[2].replace(/^["']|["']$/g, '')
-    }
-
-    return {
-      name: frontmatter.name || path.basename(path.dirname(filePath)),
-      description: frontmatter.description || '',
-      body: match[2].trim(),
-    }
-  } catch {
-    return null
-  }
-}
-
-/**
- * Seed built-in skills from src/builtin-skills/ on first startup.
- * Idempotent — only runs once per database.
- */
-const BUILTIN_SKILLS_VERSION = '1'
-
-async function seedBuiltinSkills(): Promise<void> {
-  const row = queryRow("SELECT value FROM app_config WHERE key = 'skills_version'")
-  if (row?.value === BUILTIN_SKILLS_VERSION) return
-
-  // Resolve builtin-skills directory:
-  // Dev: dist-electron/ → ../src/builtin-skills
-  // Production (electron-builder): app.asar → ../src/builtin-skills (bundled in resources)
-  const isProd = app.isPackaged
-  const skillsDir = isProd
-    ? path.resolve(process.resourcesPath, 'src/builtin-skills')
-    : path.resolve(__dirname, '../src/builtin-skills')
-  if (!fs.existsSync(skillsDir)) return
-
-  const builtinSkills: Array<{
-    id: string
-    name: string
-    description: string
-    content: string
-    builtin: boolean
-    enabled: boolean
-    created_at: string
-  }> = []
-
-  for (const dir of fs.readdirSync(skillsDir)) {
-    const skillMdPath = path.join(skillsDir, dir, 'SKILL.md')
-    if (!fs.existsSync(skillMdPath)) continue
-
-    const parsed = parseSkillMd(skillMdPath)
-    if (!parsed) continue
-
-    builtinSkills.push({
-      id: `builtin-${parsed.name}`,
-      name: parsed.name,
-      description: parsed.description,
-      content: parsed.body,
-      builtin: true,
-      enabled: true,
-      created_at: new Date().toISOString(),
-    })
-  }
-
-  if (builtinSkills.length === 0) return
-
-  // Merge with existing user skills (non-builtin ones are preserved)
-  const existing = (await getJsonConfig('skills')) as Array<Record<string, unknown>>
-  const userSkills = existing.filter((s) => !s.builtin)
-  const merged = [...builtinSkills, ...userSkills]
-
-  const d = await getDb()
-  d.run('INSERT OR REPLACE INTO app_config (key, value) VALUES ($key, $val)', {
-    $key: 'skills',
-    $val: JSON.stringify(merged),
-  })
-  d.run('INSERT OR REPLACE INTO app_config (key, value) VALUES ($key, $val)', {
-    $key: 'skills_version',
-    $val: BUILTIN_SKILLS_VERSION,
-  })
-  persistDb()
-}
-
 // ── Specific Config Helpers (thin wrappers for type clarity) ──
 
 export async function getMcpServices(_event?: Electron.IpcMainInvokeEvent) {
@@ -249,13 +158,6 @@ export async function getMcpServices(_event?: Electron.IpcMainInvokeEvent) {
 }
 export async function saveMcpServices(_event: Electron.IpcMainInvokeEvent, services: unknown[]) {
   return setJsonConfig('mcp_services', services)
-}
-
-export async function getSkills(_event?: Electron.IpcMainInvokeEvent) {
-  return getJsonConfig('skills')
-}
-export async function saveSkills(_event: Electron.IpcMainInvokeEvent, skills: unknown[]) {
-  return setJsonConfig('skills', skills)
 }
 
 export async function getAiModels(_event?: Electron.IpcMainInvokeEvent) {

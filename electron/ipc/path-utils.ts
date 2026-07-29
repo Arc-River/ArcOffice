@@ -12,5 +12,10 @@ export function isPathAllowed(targetPath: string, workingDir?: string | null): b
   if (workingDir && resolved.startsWith(workingDir + path.sep)) {
     return true
   }
+  // Allow access to the user skills directory
+  const skillsDir = path.join(app.getPath('userData'), 'skills')
+  if (resolved.startsWith(skillsDir + path.sep)) {
+    return true
+  }
   return resolved.startsWith(app.getPath('documents')) || resolved.startsWith(app.getPath('home'))
 }

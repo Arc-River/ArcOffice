@@ -65,9 +65,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getMessages: (sessionId: string) => ipcRenderer.invoke('sessions:getMessages', sessionId),
   saveMessages: (sessionId: string, messages: unknown) => ipcRenderer.invoke('sessions:saveMessages', sessionId, messages),
 
-  // Skills
-  getSkills: () => ipcRenderer.invoke('db:getSkills'),
-  saveSkills: (skills: unknown) => ipcRenderer.invoke('db:saveSkills', skills),
+  // Skills — file-system-based
+  getSkills: () => ipcRenderer.invoke('skills:getSkills'),
+  getSkillDetail: (name: string) => ipcRenderer.invoke('skills:getSkillDetail', name),
+  saveSkill: (data: { name: string; description: string; content: string }) =>
+    ipcRenderer.invoke('skills:saveSkill', data),
+  deleteSkill: (name: string) => ipcRenderer.invoke('skills:deleteSkill', name),
+  toggleSkill: (name: string, enabled: boolean) =>
+    ipcRenderer.invoke('skills:toggleSkill', name, enabled),
+  getSkillFiles: (name: string) => ipcRenderer.invoke('skills:getSkillFiles', name),
+  readSkillFile: (name: string, relativePath: string) =>
+    ipcRenderer.invoke('skills:readSkillFile', name, relativePath),
+  writeSkillFile: (name: string, relativePath: string, content: string) =>
+    ipcRenderer.invoke('skills:writeSkillFile', name, relativePath, content),
+  deleteSkillFile: (name: string, relativePath: string) =>
+    ipcRenderer.invoke('skills:deleteSkillFile', name, relativePath),
 
   // MCP services
   getMcpServices: () => ipcRenderer.invoke('db:getMcpServices'),

@@ -32,13 +32,13 @@ const inputRef = ref<HTMLInputElement | null>(null)
 const showTools = ref(false)
 
 const enabledSkills = computed(() => props.skills?.filter((s) => s.enabled) || [])
-const activeSkills = computed(() => enabledSkills.value.filter((s) => props.activeSkillIds?.includes(s.id)))
+const activeSkills = computed(() => enabledSkills.value.filter((s) => props.activeSkillIds?.includes(s.name)))
 const activeMCPDisplay = computed(() => (props.activeMcpIds || []).slice(0, 3))
 const hasActiveCapabilities = computed(
   () => (props.activeSkillIds?.length || 0) > 0 || (props.activeMcpIds?.length || 0) > 0 || props.webSearch,
 )
 
-interface CapabilityGroup<T extends { id: string }> {
+interface CapabilityGroup<T> {
   key: string
   title: string
   width: number
@@ -49,6 +49,7 @@ interface CapabilityGroup<T extends { id: string }> {
   renderIcon?: (item: T) => string
   renderColor?: (item: T) => string
   renderPreview: (item: T) => string
+  getId: (item: T) => string
 }
 
 const capabilityGroups = computed<CapabilityGroup<SkillItem | McpService>[]>(() => [
@@ -59,10 +60,11 @@ const capabilityGroups = computed<CapabilityGroup<SkillItem | McpService>[]>(() 
     items: enabledSkills.value,
     activeCount: activeSkills.value.length,
     isActive: (s) => isSkillActive(s as SkillItem),
-    toggle: (id) => handleToggleSkill({ id } as SkillItem),
+    toggle: (id) => handleToggleSkill(id),
     renderIcon: (s) => getSkillIcon((s as SkillItem).name),
     renderColor: (s) => getSkillColor((s as SkillItem).name),
     renderPreview: (s) => (s as SkillItem).description,
+    getId: (s) => (s as SkillItem).name,
   },
   {
     key: 'mcp',
@@ -71,11 +73,12 @@ const capabilityGroups = computed<CapabilityGroup<SkillItem | McpService>[]>(() 
     items: (props.mcpServices || []) as unknown as McpService[],
     activeCount: activeMCPDisplay.value.length,
     isActive: (s) => isMcpActive(s as McpService),
-    toggle: (id) => handleToggleMcp({ id } as McpService),
+    toggle: (id) => handleToggleMcp(id),
     renderPreview: (s) => {
       const m = s as McpService
       return m.type === 'stdio' ? m.command : m.url
     },
+    getId: (s) => (s as McpService).id,
   },
 ])
 
@@ -102,28 +105,28 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
-function handleToggleSkill(s: SkillItem) {
-  emit('toggleSkill', s.id)
+function handleToggleSkill(id: string) {
+  emit('toggleSkill', id)
 }
 
-function handleToggleMcp(s: McpService) {
-  emit('toggleMcp', s.id)
+function handleToggleMcp(id: string) {
+  emit('toggleMcp', id)
 }
 
 function toggleTools() {
   showTools.value = !showTools.value
 }
 
-function includesId(ids: string[] | undefined, item: { id: string }): boolean {
-  return ids?.includes(item.id) ?? false
+function includesId(ids: string[] | undefined, id: string): boolean {
+  return ids?.includes(id) ?? false
 }
 
 function isSkillActive(s: SkillItem): boolean {
-  return includesId(props.activeSkillIds, s)
+  return includesId(props.activeSkillIds, s.name)
 }
 
 function isMcpActive(s: McpService): boolean {
-  return includesId(props.activeMcpIds, s)
+  return includesId(props.activeMcpIds, s.id)
 }
 
 function handleToggleWebSearch() {
@@ -184,7 +187,7 @@ function handleToggleWebSearch() {
     <div class="chat-input__tools" v-if="activeSkills.length > 0">
       <el-tag
         v-for="s in activeSkills"
-        :key="s.id"
+        :key="s.name"
         size="small"
         type="success"
         effect="plain"
@@ -243,10 +246,10 @@ function handleToggleWebSearch() {
           <div style="max-height:200px;overflow-y:auto">
             <button
               v-for="s in g.items"
-              :key="s.id"
+              :key="g.getId(s)"
               class="chat-input__popover-item"
               :class="{ 'chat-input__popover-item--active': g.isActive(s) }"
-              @click="g.toggle(s.id)"
+              @click="g.toggle(g.getId(s))"
             >
               <span class="chat-input__popover-skill-icon" v-if="g.renderIcon" :style="{ color: g.renderColor?.(s) }">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">

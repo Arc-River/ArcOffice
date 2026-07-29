@@ -6,7 +6,8 @@ import * as fsp from 'node:fs/promises'
 import * as path from 'node:path'
 import { promisify } from 'node:util'
 import { app } from 'electron'
-import { getDb, getSkills, getMcpServices, queryRow } from './db'
+import { getDb, getMcpServices, queryRow } from './db'
+import { getSkills, readSkillFile, runScript as runSkillScript } from './skills'
 import { isPathAllowed as checkPathAllowed } from './path-utils'
 import { MCPManager, type MCPServiceConfig } from './mcp-client'
 
@@ -38,13 +39,14 @@ interface ChatCapabilities {
 }
 
 interface SkillItem {
-  id: string
   name: string
   description: string
   content?: string
   builtin?: boolean
   enabled: boolean
   created_at: string
+  hasScripts?: boolean
+  fileCount?: number
 }
 
 interface ChatParams {
@@ -318,7 +320,7 @@ async function buildSystemPrompt(capabilities?: ChatCapabilities): Promise<strin
     try {
       const allSkills = await getSkills() as SkillItem[]
       const activeSkills = allSkills.filter(
-        (s) => s.enabled && capabilities.activeSkillIds.includes(s.id),
+        (s) => s.enabled && capabilities.activeSkillIds.includes(s.name),
       )
 
       if (activeSkills.length > 0) {
@@ -420,6 +422,49 @@ async function buildDynamicTools(capabilities?: ChatCapabilities): Promise<ToolD
           required: ['query'],
         },
       })
+    }
+  }
+
+  // Expose skill script tools when skills are active
+  if (capabilities?.activeSkillIds?.length) {
+    try {
+      const allSkills = await getSkills() as SkillItem[]
+      const activeSkills = allSkills.filter(
+        (s) => s.enabled && capabilities.activeSkillIds.includes(s.name) && s.hasScripts,
+      )
+
+      if (activeSkills.length > 0) {
+        const skillNames = activeSkills.map((s) => s.name).join(', ')
+
+        extraTools.push({
+          name: 'run_skill_script',
+          description: `Execute a script file inside an activated skill directory (${skillNames}). Use when a skill instruction tells you to run its script. Provide the skill name and relative script path.`,
+          input_schema: {
+            type: 'object',
+            properties: {
+              skill_name: { type: 'string', description: `Name of the skill. One of: ${skillNames}` },
+              script_path: { type: 'string', description: 'Relative path to the script within the skill directory (e.g. scripts/recalc.py)' },
+              args: { type: 'string', description: 'Optional command-line arguments' },
+            },
+            required: ['skill_name', 'script_path'],
+          },
+        })
+
+        extraTools.push({
+          name: 'read_skill_file',
+          description: `Read a file from an activated skill directory (${skillNames}). Use to view the content of skill scripts, documentation, or reference files.`,
+          input_schema: {
+            type: 'object',
+            properties: {
+              skill_name: { type: 'string', description: `Name of the skill. One of: ${skillNames}` },
+              file_path: { type: 'string', description: 'Relative path to the file within the skill directory (e.g. SKILL.md, scripts/recalc.py)' },
+            },
+            required: ['skill_name', 'file_path'],
+          },
+        })
+      }
+    } catch {
+      // Skills not available — skip
     }
   }
 
@@ -726,6 +771,22 @@ async function streamAnthropic(
           let result: unknown
           if (mcpManager?.isMCPTool(tu.name)) {
             result = await mcpManager.callTool(tu.name, tu.input)
+          } else if (tu.name === 'run_skill_script') {
+            const input = tu.input as Record<string, unknown>
+            const r = await runSkillScript(
+              undefined,
+              String(input.skill_name),
+              String(input.script_path),
+              String(input.args || ''),
+            )
+            result = `Exit code: ${r.exitCode}\n${r.stdout}${r.stderr ? '\nStderr:\n' + r.stderr : ''}`
+          } else if (tu.name === 'read_skill_file') {
+            const input = tu.input as Record<string, unknown>
+            result = await readSkillFile(
+              undefined,
+              String(input.skill_name),
+              String(input.file_path),
+            )
           } else {
             result = await executeTool(tu.name, tu.input)
           }
