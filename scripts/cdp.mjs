@@ -96,7 +96,7 @@ async function main() {
       const dir = new URL('screenshots', import.meta.url)
       fs.mkdirSync(dir, { recursive: true })
       const name = `electron-${new Date().toISOString().replace(/[:.]/g, '-')}.png`
-      fs.writeFileSync(new URL(name, import.meta.url), Buffer.from(result.data, 'base64'))
+      fs.writeFileSync(new URL(name, dir), Buffer.from(result.data, 'base64'))
       console.log('Saved to scripts/screenshots/' + name)
       break
     }

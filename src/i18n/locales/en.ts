@@ -284,9 +284,9 @@ export default {
   },
   time: {
     justNow: 'just now',
-    minutesAgo: '{minutes}m ago',
-    hoursAgo: '{hours}h ago',
-    daysAgo: '{days}d ago',
+    minutesAgo: '{n}m ago',
+    hoursAgo: '{n}h ago',
+    daysAgo: '{n}d ago',
     yesterday: 'yesterday',
   },
   electron: {

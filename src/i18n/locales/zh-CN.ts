@@ -284,9 +284,9 @@ export default {
   },
   time: {
     justNow: '刚刚',
-    minutesAgo: '{minutes}分钟前',
-    hoursAgo: '{hours}小时前',
-    daysAgo: '{days}天前',
+    minutesAgo: '{n}分钟前',
+    hoursAgo: '{n}小时前',
+    daysAgo: '{n}天前',
     yesterday: '昨天',
   },
   electron: {

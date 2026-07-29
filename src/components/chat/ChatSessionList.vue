@@ -222,6 +222,8 @@ function _cancelRename() {
       @include font-body-xs;
       font-size: 10px;
       color: var(--arc-text-placeholder);
+      min-width: 44px;
+      text-align: right;
     }
 
     &-delete {
