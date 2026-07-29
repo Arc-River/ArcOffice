@@ -8,14 +8,18 @@ import { registerAllHandlers } from './ipc'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// 开发模式下启用 Node.js inspector，方便 chrome://inspect 调试主进程
+// 开发模式下启用调试端口
 if (!app.isPackaged) {
+  // 开启 Node.js inspector，方便 chrome://inspect 调试主进程
   try {
     open(9229, '0.0.0.0', false)
     console.log('[debug] Inspector listening on ws://0.0.0.0:9229')
   } catch {
     // inspector already open or not available
   }
+
+  // 开启 Chrome DevTools Protocol 端口，方便 Claude Code / Chrome 调试 renderer
+  app.commandLine.appendSwitch('remote-debugging-port', '8315')
 }
 
 process.env.DIST = path.join(__dirname, '../dist')

@@ -91,3 +91,67 @@ The OnlyOffice editor runs entirely client-side (no backend server needed):
 ### OnlyOffice files are third-party library code
 
 `src/components/onlyoffice/` should NOT be modified unless fixing a specific integration issue. Biome overrides disable several lint rules for this directory. The source is from electroluxcode/onlyoffice-web-comp.
+
+## Debugging with Chrome DevTools (CDP)
+
+`electron/main.ts` automatically enables two debugging ports in dev mode (`!app.isPackaged`):
+
+| Port | Protocol | Use |
+|------|----------|-----|
+| 9229 | Node.js Inspector | Debug main process via `chrome://inspect` |
+| 8315 | Chrome DevTools Protocol | Debug renderer process (DOM, console, network, JS eval) |
+
+### Using the bundled script
+
+```bash
+node scripts/cdp.mjs pages              # list all renderer pages and their IDs
+node scripts/cdp.mjs screenshot <pageId> # capture a screenshot -> scripts/screenshots/electron-<ts>.png
+node scripts/cdp.mjs eval <pageId> <js>  # execute JS in the renderer (one-liner)
+node scripts/cdp.mjs snap <pageId>       # accessibility tree snapshot
+```
+
+### Using Chrome DevTools MCP (Claude Code)
+
+Configure an MCP server in `.claude/settings.json` so Claude Code can use
+`mcp__chrome-devtools-electron__*` tools to control Electron directly:
+
+```json
+{
+  "mcpServers": {
+    "chrome-devtools-electron": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp",
+        "--wsEndpoint",
+        "ws://127.0.0.1:8315/devtools/browser/<browser-id>"
+      ]
+    }
+  }
+}
+```
+
+Get the `<browser-id>` from `node cdp.mjs pages` output, or from the DevTools
+listening message printed at startup:
+
+```
+DevTools listening on ws://127.0.0.1:8315/devtools/browser/50af5ba4-...
+```
+
+With the MCP server connected, Claude Code can: take snapshots of the page
+structure, click buttons, fill forms, read console output, inspect network
+requests, execute arbitrary JS, and capture screenshots — all on the live
+Electron renderer.
+
+**Note:** Restart the Claude Code session after editing `.claude/settings.json`
+for the new MCP server to be loaded. Remove the entry to revert to the default
+independent Chrome instance.
+
+### Raw CDP via curl
+
+```bash
+# list targets
+curl -s http://127.0.0.1:8315/json | python3 -m json.tool
+# get browser metadata
+curl -s http://127.0.0.1:8315/json/version | python3 -m json.tool
+```

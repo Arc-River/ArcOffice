@@ -40,3 +40,4 @@ src/components.d.ts
 
 # — 临时文件 —
 .tmp/
+scripts/screenshots/
